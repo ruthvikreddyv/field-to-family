@@ -1,0 +1,6 @@
+'use client';
+import { Minus, Plus } from 'lucide-react';
+import { Product } from '@/lib/types';
+import { useCart } from './cart-context';
+import { money } from '@/lib/api';
+export function ProductCard({product}:{product:Product}){const {items,add,setQty,remove}=useCart();const item=items.find(x=>x.product.id===product.id);const step=Number(product.quantity_step);const min=Number(product.minimum_quantity);const q=item?.quantity||0;return <article className="card"><img src={product.image_url} alt={product.name} className="product-img"/><div className="product-info"><span className="small muted">{product.category} · {product.unit}</span><h3 style={{margin:'6px 0 2px'}}>{product.name}</h3><div className="price">{money(product.selling_price)} <span className="muted small">/ {product.unit}</span></div>{item?<div className="qtyrow"><div className="stepper"><button onClick={()=>q-step<min?remove(product.id):setQty(product.id,Number((q-step).toFixed(3)))}><Minus size={15}/></button><strong>{q}</strong><button onClick={()=>setQty(product.id,Number((q+step).toFixed(3)))}><Plus size={15}/></button></div><button className="btn btn-secondary" onClick={()=>{}}>In cart</button></div>:<button className="btn btn-primary" style={{width:'100%',marginTop:10}} onClick={()=>add(product)}>Add</button>}</div></article>}
