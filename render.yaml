@@ -5,7 +5,7 @@ services:
     region: singapore
     plan: free
     rootDir: backend
-    dockerCommand: sh -c "alembic upgrade head && python3 -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    dockerCommand: sh ./start.sh
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
