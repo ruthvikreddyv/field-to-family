@@ -6,7 +6,12 @@ from app import models  # noqa: F401
 from app.config import get_settings
 
 config = context.config
-config.set_main_option('sqlalchemy.url', get_settings().database_url)
+database_url = get_settings().database_url
+if database_url.startswith('postgres://'):
+    database_url = 'postgresql+psycopg://' + database_url[len('postgres://'):]
+elif database_url.startswith('postgresql://'):
+    database_url = 'postgresql+psycopg://' + database_url[len('postgresql://'):]
+config.set_main_option('sqlalchemy.url', database_url.replace('%', '%%'))
 if config.config_file_name:
     fileConfig(config.config_file_name)
 target_metadata = Base.metadata
