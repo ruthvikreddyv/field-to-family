@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
-import { CONFIG, makeOrderCode } from "../lib/products";
+import { CONFIG, makeOrderCode, joinAddress, locateAndReverseGeocode } from "../lib/products";
 
 function buildOrderText(order) {
   const lines = order.lines
@@ -18,6 +18,7 @@ function buildOrderText(order) {
     "Name: " + order.customerName + "\n" +
     "Phone: " + order.customerPhone + "\n" +
     "Address: " + order.address + ", " + order.area + ", Hyderabad\n" +
+    (order.latitude ? "Location pin: https://maps.google.com/?q=" + order.latitude + "," + order.longitude + "\n" : "") +
     "Slot: " + order.slot + "\n" +
     "Payment: " + order.payment +
     (order.notes ? "\nNotes: " + order.notes : "")
@@ -37,11 +38,14 @@ export default function CartDrawer() {
   const meetsMin = subtotal >= CONFIG.minOrder;
 
   const [form, setForm] = useState({
-    name: "", phone: "", address: "", area: "",
+    name: "", phone: "", flatNo: "", building: "", street: "", area: "",
+    latitude: null, longitude: null,
     slot: CONFIG.deliverySlots[0], payment: "Cash on delivery", notes: "",
   });
   const [formError, setFormError] = useState("");
   const [placing, setPlacing] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [locateError, setLocateError] = useState("");
 
   useEffect(() => {
     if (profile) {
@@ -49,13 +53,34 @@ export default function CartDrawer() {
         ...f,
         name: profile.full_name || f.name,
         phone: profile.phone || f.phone,
-        address: profile.default_address || f.address,
+        flatNo: profile.flat_no || f.flatNo,
+        building: profile.building || f.building,
+        street: profile.street || f.street,
         area: profile.default_area || f.area,
+        latitude: profile.latitude ?? f.latitude,
+        longitude: profile.longitude ?? f.longitude,
       }));
     } else if (user) {
       setForm((f) => ({ ...f, name: f.name || user.email }));
     }
   }, [profile, user]);
+
+  async function handleUseLocation() {
+    setLocateError("");
+    setLocating(true);
+    try {
+      const loc = await locateAndReverseGeocode();
+      setForm((f) => ({
+        ...f,
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        street: loc.street || f.street,
+      }));
+    } catch (e) {
+      setLocateError(e.message || "Couldn't get your location. You can still type your address in below.");
+    }
+    setLocating(false);
+  }
 
   useEffect(() => {
     function onKey(e) { if (e.key === "Escape") closeDrawer(); }
@@ -64,8 +89,8 @@ export default function CartDrawer() {
   }, [closeDrawer]);
 
   async function handlePlaceOrder() {
-    if (!form.name.trim() || !form.phone.trim() || !form.address.trim() || !form.area) {
-      setFormError("Please fill in your name, phone, address and area before placing the order.");
+    if (!form.name.trim() || !form.phone.trim() || !form.flatNo.trim() || !form.street.trim() || !form.area) {
+      setFormError("Please fill in your name, phone, flat/house no., street and area before placing the order.");
       return;
     }
     setFormError("");
@@ -76,13 +101,16 @@ export default function CartDrawer() {
       id: l.item.id, name: l.item.name, hi: l.item.hi, te: l.item.te,
       qty: l.qty, unit: l.item.unit, price: l.item.price, lineTotal: l.lineTotal,
     }));
+    const combinedAddress = joinAddress(form);
 
     const { error } = await supabase.from("orders").insert({
       user_id: user.id,
       order_code: orderCode,
       items: itemsPayload,
       subtotal, delivery_fee: deliveryFee, total,
-      area: form.area, address: form.address.trim(),
+      area: form.area, address: combinedAddress,
+      flat_no: form.flatNo.trim(), building: form.building.trim(), street: form.street.trim(),
+      latitude: form.latitude, longitude: form.longitude,
       slot: form.slot, payment: form.payment, notes: form.notes.trim(),
     });
 
@@ -98,8 +126,10 @@ export default function CartDrawer() {
       id: user.id,
       full_name: form.name.trim(),
       phone: form.phone.trim(),
-      default_address: form.address.trim(),
+      default_address: combinedAddress,
       default_area: form.area,
+      flat_no: form.flatNo.trim(), building: form.building.trim(), street: form.street.trim(),
+      latitude: form.latitude, longitude: form.longitude,
     });
 
     setLastOrder({
@@ -107,7 +137,8 @@ export default function CartDrawer() {
       lines: itemsPayload,
       subtotal, delivery_fee: deliveryFee, total,
       customerName: form.name.trim(), customerPhone: form.phone.trim(),
-      address: form.address.trim(), area: form.area,
+      address: combinedAddress, area: form.area,
+      latitude: form.latitude, longitude: form.longitude,
       slot: form.slot, payment: form.payment, notes: form.notes.trim(),
     });
     clearCart();
@@ -190,7 +221,33 @@ export default function CartDrawer() {
               </div>
               <div className="field">
                 <label htmlFor="f-address">Delivery address</label>
-                <textarea id="f-address" placeholder="Flat / house no., building, street, landmark" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+                <button
+                  type="button"
+                  className="btn-outline"
+                  style={{ width: "100%", marginBottom: 10, fontSize: 13.5 }}
+                  onClick={handleUseLocation}
+                  disabled={locating}
+                >
+                  {locating ? "Finding your location…" : "📍 Use my current location"}
+                </button>
+                {locateError && <div className="form-error" style={{ marginTop: -4 }}>{locateError}</div>}
+                {form.latitude && (
+                  <div className="form-note" style={{ marginTop: -4 }}>
+                    Location pinned ✓ — street below was filled in automatically, please check it.
+                  </div>
+                )}
+              </div>
+              <div className="field">
+                <label htmlFor="f-flat">Flat / House no.</label>
+                <input id="f-flat" placeholder="e.g. 302" value={form.flatNo} onChange={(e) => setForm({ ...form, flatNo: e.target.value })} />
+              </div>
+              <div className="field">
+                <label htmlFor="f-building">Apartment / building name <span className="hint">(optional)</span></label>
+                <input id="f-building" placeholder="e.g. Green Meadows" value={form.building} onChange={(e) => setForm({ ...form, building: e.target.value })} />
+              </div>
+              <div className="field">
+                <label htmlFor="f-street">Street / road name</label>
+                <input id="f-street" placeholder="e.g. Road No. 12, near HDFC Bank" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
               </div>
               <div className="field">
                 <label htmlFor="f-area">Area (Hyderabad only, for now)</label>

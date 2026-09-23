@@ -59,6 +59,14 @@ export default function Orders() {
               <div className="order-date">
                 {new Date(o.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
                 {" · "}{o.area}, Hyderabad · {o.slot}
+                {o.latitude && (
+                  <>
+                    {" · "}
+                    <a href={`https://maps.google.com/?q=${o.latitude},${o.longitude}`} target="_blank" rel="noopener noreferrer">
+                      view pinned location
+                    </a>
+                  </>
+                )}
               </div>
               <div className="order-items" style={{ marginTop: 10 }}>
                 {o.items.map((it) => `${it.name} x ${it.qty} ${it.unit}`).join(", ")}

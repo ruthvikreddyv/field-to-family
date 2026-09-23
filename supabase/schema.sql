@@ -12,6 +12,11 @@ create table if not exists public.profiles (
   phone text,
   default_address text,
   default_area text,
+  flat_no text,
+  building text,
+  street text,
+  latitude double precision,
+  longitude double precision,
   created_at timestamptz not null default now()
 );
 
@@ -66,6 +71,11 @@ create table if not exists public.orders (
   total numeric not null,
   area text not null,
   address text not null,
+  flat_no text,
+  building text,
+  street text,
+  latitude double precision,
+  longitude double precision,
   slot text,
   payment text,
   notes text,
