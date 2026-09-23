@@ -1,4 +1,0 @@
-'use client';
-import { useEffect,useState } from 'react';
-import { api } from '@/lib/api';
-export default function BulkAdmin(){const [rows,setRows]=useState<any[]>([]);useEffect(()=>{api<any[]>('/admin/bulk').then(setRows)},[]);return <div><div className="eyebrow">Farm team</div><h1 className="h2">Bulk inquiries</h1><div className="grid grid-2">{rows.map(r=><div className="card card-pad" key={r.id}><div style={{display:'flex',justifyContent:'space-between'}}><b>{r.name}</b><span className="status-pill">#{r.id}</span></div><p className="small muted">{r.phone} · {r.email}</p><p><b>Location:</b> {r.apartment_location}</p><p><b>Required:</b> {r.required_delivery_date||'Flexible'}</p><p><b>Products:</b> {r.products||'—'}</p><p><b>Quantity:</b> {r.estimated_quantity||'—'}</p><p className="muted">{r.message||'No message'}</p></div>)}</div></div>}

@@ -1,7 +1,0 @@
-'use client';
-import { useEffect,useState } from 'react';
-import { api } from '@/lib/api';
-import { Product } from '@/lib/types';
-import { ProductCard } from '@/components/product-card';
-import Link from 'next/link';
-export default function Shop(){const [products,setProducts]=useState<Product[]>([]);const [loading,setLoading]=useState(true);const [category,setCategory]=useState('All');useEffect(()=>{api<Product[]>('/products').then(setProducts).finally(()=>setLoading(false))},[]);const cats=['All',...Array.from(new Set(products.map(p=>p.category)))];const visible=category==='All'?products:products.filter(p=>p.category===category);return <main className="page"><div className="container"><div style={{display:'flex',justifyContent:'space-between',gap:16,alignItems:'end',flexWrap:'wrap'}}><div><div className="eyebrow">Fresh this cycle</div><h1 className="h2" style={{fontSize:'2.8rem'}}>Shop vegetables</h1><p className="muted">Choose quantities in the steps configured for each product.</p></div><Link href="/cart" className="btn btn-primary">View Cart</Link></div><div className="inline-actions" style={{margin:'24px 0'}}>{cats.map(c=><button className={`btn ${category===c?'btn-primary':'btn-outline'}`} key={c} onClick={()=>setCategory(c)}>{c}</button>)}</div>{loading?<p>Loading fresh produce…</p>:<div className="product-grid">{visible.map(p=><ProductCard key={p.id} product={p}/>)}</div>}</div></main>}

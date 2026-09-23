@@ -1,18 +1,15 @@
-# Python
-backend/.venv/
-backend/**/__pycache__/
-*.pyc
+# dependencies
+/node_modules
 
-# Node
-frontend/node_modules/
-frontend/.next/
-npm-debug.log*
+# next.js build output
+/.next/
+/out/
 
-# Env
-.env
-.env.*
-!.env.example
+# env files with real secrets - never commit these
+.env.local
+.env*.local
 
-# OS
+# misc
 .DS_Store
-Thumbs.db
+*.log
+npm-debug.log*

@@ -1,7 +1,0 @@
-'use client';
-import Link from 'next/link';
-import { usePathname,useRouter } from 'next/navigation';
-import { useEffect,useState } from 'react';
-import { api } from '@/lib/api';
-const links=[['/admin','Overview'],['/admin/orders','Orders'],['/admin/procurement','Procurement'],['/admin/packing','Packing'],['/admin/reconciliation','Cash Reconciliation'],['/admin/products','Products'],['/admin/apartments','Apartments'],['/admin/expenses','Expenses'],['/admin/bulk','Bulk Inquiries'],['/admin/settings','Settings']];
-export function AdminShell({children}:{children:React.ReactNode}){const path=usePathname();const r=useRouter();const [ready,setReady]=useState(false);useEffect(()=>{api<any>('/auth/me').then(u=>{if(u.role!=='ADMIN')r.push('/login');else setReady(true)}).catch(()=>r.push('/login'))},[r]);return <div className="admin-layout"><aside className="side"><Link href="/admin" style={{fontSize:'1.15rem',fontWeight:900,display:'block',marginBottom:25}}>Field <span style={{color:'#a9d4b9'}}>to</span> Family</Link>{links.map(([href,label])=><Link className={path===href?'active':''} key={href} href={href}>{label}</Link>)}<hr style={{borderColor:'#456455',margin:'24px 0'}}/><button onClick={async()=>{await api('/auth/logout',{method:'POST'});r.push('/login')}} className="btn btn-secondary" style={{width:'100%'}}>Sign out</button></aside><section className="dashboard">{ready?children:<div className="empty">Checking admin access…</div>}</section></div>}

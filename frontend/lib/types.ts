@@ -1,4 +1,0 @@
-export type Product={id:number;name:string;category:string;unit:string;selling_price:string;minimum_quantity:string;quantity_step:string;image_url:string;active:boolean};
-export type Apartment={id:number;name:string;address:string;coordinator_name:string;coordinator_phone:string;active:boolean};
-export type CartItem={product:Product;quantity:number};
-export type Order={order_id:string;customer_name:string;customer_phone:string;customer_email:string;apartment_id:number;apartment_name:string;flat_number:string;delivery_instructions:string;order_status:string;payment_status:string;delivery_date:string;delivery_window_start:string;delivery_window_end:string;subtotal:string;delivery_charge:string;discount:string;total:string;items:{product_id:number;product_name:string;unit:string;quantity:number;unit_price:string;line_total:string}[]};
