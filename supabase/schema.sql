@@ -3,9 +3,8 @@
 
 create extension if not exists pgcrypto;
 
--- ============================================================
 -- 1. PROFILES - one row per signed-up customer, linked to auth.users
--- ============================================================
+
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
