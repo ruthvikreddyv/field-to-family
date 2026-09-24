@@ -25,20 +25,6 @@ styles/         globals.css (all styling)
 supabase/       schema.sql — run this in your Supabase project once
 ```
 
-## Before you start
-
-You'll need free accounts on:
-1. [GitHub](https://github.com) — to host the code
-2. [Supabase](https://supabase.com) — the database + login system
-3. [Vercel](https://vercel.com) — to host the live website
-
-See **DEPLOY.md** for the full step-by-step walkthrough.
-
-## Editing the catalog, prices, or delivery areas
-
-Everything is in `lib/products.js` — the `CONFIG` object (business name, WhatsApp number,
-email, delivery areas, delivery slots, minimum order, delivery fee) and the `CATALOG` array
-(vegetables, prices, Hindi/Telugu names). Edit, commit, and push — Vercel redeploys automatically.
 
 ## Running locally
 
