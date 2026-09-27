@@ -1,9 +1,10 @@
 import Catalog from "../components/Catalog";
-import { ALL_ITEMS, CONFIG } from "../lib/products";
-
-const PICKS = ["spinach", "carrot", "tomato", "peas", "cauliflower"];
+import { CONFIG } from "../lib/products";
+import { useProducts } from "../context/ProductsContext";
 
 export default function Home() {
+  const { todaysHarvest } = useProducts();
+
   return (
     <>
       <div className="hero">
@@ -18,18 +19,17 @@ export default function Home() {
             <a href="#catalog" className="btn-primary">Start your order</a>
             <span className="hero-note">Minimum order ₹{CONFIG.minOrder} · Free delivery above ₹{CONFIG.freeDeliveryAbove}</span>
           </div>
-          <div className="harvest-strip">
-            <span className="label">Today&apos;s harvest</span>
-            {PICKS.map((id) => {
-              const it = ALL_ITEMS[id];
-              return (
-                <span className="item" key={id}>
-                  <span className="ic">{it.ic}</span>
+          {todaysHarvest.length > 0 && (
+            <div className="harvest-strip">
+              <span className="label">Today&apos;s harvest</span>
+              {todaysHarvest.map((it) => (
+                <span className="item" key={it.id}>
+                  <span className="ic">{it.icon}</span>
                   {it.name}
                 </span>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

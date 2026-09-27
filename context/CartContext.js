@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { ALL_ITEMS } from "../lib/products";
+import { useProducts } from "./ProductsContext";
 
 const CartContext = createContext(null);
 
@@ -50,23 +50,12 @@ export function CartProvider({ children }) {
   }, []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
-  const lines = Object.keys(cart)
-    .filter((id) => cart[id] > 0 && ALL_ITEMS[id])
-    .map((id) => {
-      const item = ALL_ITEMS[id];
-      const qty = cart[id];
-      return { item, qty, lineTotal: item.price * qty };
-    });
-
-  const subtotal = lines.reduce((sum, l) => sum + l.lineTotal, 0);
   const count = Object.values(cart).reduce((a, b) => a + b, 0);
 
   return (
     <CartContext.Provider
       value={{
         cart,
-        lines,
-        subtotal,
         count,
         addItem,
         setQty,
@@ -87,4 +76,25 @@ export function CartProvider({ children }) {
 
 export function useCart() {
   return useContext(CartContext);
+}
+
+// Combines the raw {productId: qty} cart with the live product catalog to
+// produce priced line items. Always reflects the current database price -
+// the actual charge is still computed authoritatively by place_order() on
+// the server, this is just for display before checkout.
+export function useCartLines() {
+  const { cart } = useCart();
+  const { getProduct } = useProducts();
+
+  const lines = Object.keys(cart)
+    .filter((id) => cart[id] > 0 && getProduct(id))
+    .map((id) => {
+      const item = getProduct(id);
+      const qty = cart[id];
+      return { item, qty, lineTotal: item.price * qty };
+    });
+
+  const subtotal = lines.reduce((sum, l) => sum + l.lineTotal, 0);
+
+  return { lines, subtotal };
 }

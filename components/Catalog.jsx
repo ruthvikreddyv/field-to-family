@@ -1,11 +1,14 @@
-import { useState } from "react";
-import { CATALOG, ALL_ITEMS } from "../lib/products";
+import { useState, useMemo } from "react";
+import { useProducts } from "../context/ProductsContext";
 import { useCart } from "../context/CartContext";
 
 function ProduceRow({ item }) {
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+
+  const outOfStock = item.stock <= 0 || !item.available;
+  const lowStock = !outOfStock && item.stock <= item.low_stock_threshold;
 
   function handleAdd() {
     addItem(item.id, qty);
@@ -15,37 +18,42 @@ function ProduceRow({ item }) {
 
   return (
     <div className="produce-row">
-      <div className="ic">{item.ic}</div>
+      <div className="ic">{item.icon}</div>
       <div>
         <div className="produce-name">
           {item.name}{" "}
           <span className="produce-native">
-            ({item.hi} · {item.te})
+            ({item.name_hi} · {item.name_te})
           </span>
-          {item.tags.includes("organic") && <span className="badge organic">Organic</span>}
-          {item.tags.includes("season") && <span className="badge season">In season</span>}
+          {item.todays_harvest && <span className="badge season">🌾 Today's harvest</span>}
+          {item.tags?.includes("organic") && <span className="badge organic">Organic</span>}
+          {item.tags?.includes("season") && <span className="badge season">In season</span>}
         </div>
         <div className="produce-meta">
           <span className="price">₹{item.price}</span> / {item.unit}
+          {outOfStock && <span className="badge" style={{ color: "var(--tomato)", marginLeft: 8 }}>Out of stock</span>}
+          {lowStock && <span className="badge" style={{ color: "var(--tomato)", marginLeft: 8 }}>Only {item.stock} left</span>}
         </div>
       </div>
       <div className="row-actions">
-        <div className="qty-stepper">
-          <button type="button" aria-label="Decrease quantity" onClick={() => setQty((q) => Math.max(1, q - 1))}>−</button>
-          <input
-            type="text"
-            inputMode="numeric"
-            aria-label="Quantity"
-            value={qty}
-            onChange={(e) => {
-              const v = parseInt(e.target.value, 10);
-              setQty(!v || v < 1 ? 1 : Math.min(99, v));
-            }}
-          />
-          <button type="button" aria-label="Increase quantity" onClick={() => setQty((q) => Math.min(99, q + 1))}>+</button>
-        </div>
-        <button type="button" className={"add-btn" + (added ? " added" : "")} onClick={handleAdd}>
-          {added ? "Added ✓" : "Add"}
+        {!outOfStock && (
+          <div className="qty-stepper">
+            <button type="button" aria-label="Decrease quantity" onClick={() => setQty((q) => Math.max(1, q - 1))}>−</button>
+            <input
+              type="text"
+              inputMode="numeric"
+              aria-label="Quantity"
+              value={qty}
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10);
+                setQty(!v || v < 1 ? 1 : Math.min(item.stock, v));
+              }}
+            />
+            <button type="button" aria-label="Increase quantity" onClick={() => setQty((q) => Math.min(item.stock, q + 1))}>+</button>
+          </div>
+        )}
+        <button type="button" className={"add-btn" + (added ? " added" : "")} onClick={handleAdd} disabled={outOfStock}>
+          {outOfStock ? "Unavailable" : added ? "Added ✓" : "Add"}
         </button>
       </div>
     </div>
@@ -53,7 +61,9 @@ function ProduceRow({ item }) {
 }
 
 export default function Catalog() {
+  const { byCategory, loading, error } = useProducts();
   const [activeCat, setActiveCat] = useState("all");
+  const [query, setQuery] = useState("");
 
   function scrollToCat(catId) {
     setActiveCat(catId);
@@ -63,6 +73,22 @@ export default function Catalog() {
     }
   }
 
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return byCategory;
+    return byCategory
+      .map((cat) => ({
+        ...cat,
+        items: cat.items.filter(
+          (it) =>
+            it.name.toLowerCase().includes(q) ||
+            (it.name_hi || "").includes(q) ||
+            (it.name_te || "").includes(q)
+        ),
+      }))
+      .filter((cat) => cat.items.length > 0);
+  }, [byCategory, query]);
+
   return (
     <>
       <nav className="cats" aria-label="Vegetable categories">
@@ -70,7 +96,7 @@ export default function Catalog() {
           <button className={"cat-pill" + (activeCat === "all" ? " active" : "")} onClick={() => scrollToCat("all")}>
             All vegetables
           </button>
-          {CATALOG.map((cat) => (
+          {byCategory.map((cat) => (
             <button
               key={cat.id}
               className={"cat-pill" + (activeCat === cat.id ? " active" : "")}
@@ -83,16 +109,35 @@ export default function Catalog() {
       </nav>
 
       <main className="page wrap" id="catalog">
-        {CATALOG.map((cat) => (
+        <div className="field" style={{ maxWidth: 360, marginTop: 24 }}>
+          <input
+            type="search"
+            placeholder="Search vegetables… (English, Hindi or Telugu)"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Search vegetables"
+          />
+        </div>
+
+        {loading && <div className="center-loading">Loading today's stock…</div>}
+        {error && <div className="auth-alert error">{error}</div>}
+
+        {!loading && filtered.length === 0 && (
+          <div className="empty-state">
+            <div className="ic">🥕</div>
+            No vegetables match your search right now.
+          </div>
+        )}
+
+        {filtered.map((cat) => (
           <section className="category-block" id={"cat-" + cat.id} key={cat.id}>
             <div className="category-head">
               <h2>{cat.label}</h2>
               <span className="count">{cat.items.length} items</span>
             </div>
-            {cat.note && <p className="category-note">{cat.note}</p>}
             <div className="produce-list">
               {cat.items.map((it) => (
-                <ProduceRow item={ALL_ITEMS[it.id]} key={it.id} />
+                <ProduceRow item={it} key={it.id} />
               ))}
             </div>
           </section>

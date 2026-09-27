@@ -27,6 +27,9 @@ export default function Header() {
           {user && (
             <Link href="/orders" className={router.pathname === "/orders" ? "active" : ""}>My orders</Link>
           )}
+          {profile?.is_admin && (
+            <Link href="/admin" className={router.pathname.startsWith("/admin") ? "active" : ""}>Admin</Link>
+          )}
         </nav>
         <div className="header-right">
           {user ? (

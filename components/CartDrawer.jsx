@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useCart } from "../context/CartContext";
+import { useCart, useCartLines } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
-import { CONFIG, makeOrderCode, joinAddress, locateAndReverseGeocode } from "../lib/products";
+import { CONFIG, joinAddress, locateAndReverseGeocode } from "../lib/products";
 
 function buildOrderText(order) {
   const lines = order.lines
@@ -28,8 +28,9 @@ function buildOrderText(order) {
 export default function CartDrawer() {
   const {
     drawerOpen, drawerStep, setDrawerStep, closeDrawer,
-    lines, subtotal, lastOrder, setLastOrder, setQty, clearCart,
+    lastOrder, setLastOrder, setQty, clearCart,
   } = useCart();
+  const { lines, subtotal } = useCartLines();
   const { user, profile } = useAuth();
   const router = useRouter();
 
@@ -96,28 +97,30 @@ export default function CartDrawer() {
     setFormError("");
     setPlacing(true);
 
-    const orderCode = makeOrderCode();
-    const itemsPayload = lines.map((l) => ({
-      id: l.item.id, name: l.item.name, hi: l.item.hi, te: l.item.te,
-      qty: l.qty, unit: l.item.unit, price: l.item.price, lineTotal: l.lineTotal,
-    }));
     const combinedAddress = joinAddress(form);
 
-    const { error } = await supabase.from("orders").insert({
-      user_id: user.id,
-      order_code: orderCode,
-      items: itemsPayload,
-      subtotal, delivery_fee: deliveryFee, total,
-      area: form.area, address: combinedAddress,
-      flat_no: form.flatNo.trim(), building: form.building.trim(), street: form.street.trim(),
-      latitude: form.latitude, longitude: form.longitude,
-      slot: form.slot, payment: form.payment, notes: form.notes.trim(),
+    // The server prices everything itself from the products table, checks
+    // stock, and decrements it atomically - nothing here is trusted as-is.
+    const { data, error } = await supabase.rpc("place_order", {
+      p_items: lines.map((l) => ({ product_id: l.item.id, qty: l.qty })),
+      p_area: form.area,
+      p_address: combinedAddress,
+      p_flat_no: form.flatNo.trim(),
+      p_building: form.building.trim(),
+      p_street: form.street.trim(),
+      p_latitude: form.latitude,
+      p_longitude: form.longitude,
+      p_slot: form.slot,
+      p_payment: form.payment,
+      p_notes: form.notes.trim(),
     });
 
     setPlacing(false);
 
     if (error) {
-      setFormError("Something went wrong saving your order (" + error.message + "). Please try again.");
+      // The database raises a plain-English message for out-of-stock,
+      // unavailable items, or below-minimum orders - show it as-is.
+      setFormError(error.message.replace(/^.*?:\s*/, ""));
       return;
     }
 
@@ -133,9 +136,9 @@ export default function CartDrawer() {
     });
 
     setLastOrder({
-      order_code: orderCode,
-      lines: itemsPayload,
-      subtotal, delivery_fee: deliveryFee, total,
+      order_code: data.order_code,
+      lines: data.items,
+      subtotal: data.subtotal, delivery_fee: data.delivery_fee, total: data.total,
       customerName: form.name.trim(), customerPhone: form.phone.trim(),
       address: combinedAddress, area: form.area,
       latitude: form.latitude, longitude: form.longitude,
@@ -182,7 +185,7 @@ export default function CartDrawer() {
               <>
                 {lines.map((l) => (
                   <div className="basket-row" key={l.item.id}>
-                    <div className="ic">{l.item.ic}</div>
+                    <div className="ic">{l.item.icon}</div>
                     <div className="info">
                       <div className="name">{l.item.name}</div>
                       <div className="unit-price">₹{l.item.price} / {l.item.unit}</div>

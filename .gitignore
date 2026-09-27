@@ -13,3 +13,4 @@
 .DS_Store
 *.log
 npm-debug.log*
+recovery-codes.txt
