@@ -40,12 +40,3 @@ Everything is in `lib/products.js` — the `CONFIG` object (business name, Whats
 email, delivery areas, delivery slots, minimum order, delivery fee) and the `CATALOG` array
 (vegetables, prices, Hindi/Telugu names). Edit, commit, and push — Vercel redeploys automatically.
 
-## Running locally
-
-```bash
-npm install
-cp .env.example .env.local   # then fill in your real Supabase URL/key
-npm run dev
-```
-
-Open http://localhost:3000
