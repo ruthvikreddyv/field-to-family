@@ -63,7 +63,7 @@ export default function CartDrawer() {
         longitude: profile.longitude ?? f.longitude,
       }));
     } else if (user) {
-      setForm((f) => ({ ...f, phone: f.phone || (user.phone || "").replace(/\D/g, "").slice(-10) }));
+      setForm((f) => ({ ...f, name: f.name || user.email }));
     }
   }, [profile, user]);
 

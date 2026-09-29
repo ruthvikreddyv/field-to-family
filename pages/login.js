@@ -1,25 +1,19 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import { CONFIG, toE164Indian, isValidIndianMobile } from "../lib/products";
-
-const RESEND_SECONDS = 30;
+import { CONFIG } from "../lib/products";
 
 export default function Login() {
   const router = useRouter();
   const { user } = useAuth();
   const { openDrawer } = useCart();
-
-  const [step, setStep] = useState("phone"); // 'phone' | 'otp'
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [resendIn, setResendIn] = useState(0);
-  const timerRef = useRef(null);
 
   useEffect(() => {
     if (user) {
@@ -32,46 +26,11 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  useEffect(() => {
-    if (resendIn <= 0) return;
-    timerRef.current = setTimeout(() => setResendIn((s) => s - 1), 1000);
-    return () => clearTimeout(timerRef.current);
-  }, [resendIn]);
-
-  async function sendCode(e) {
-    e?.preventDefault();
-    setError("");
-    if (!isValidIndianMobile(phone)) {
-      setError("Enter a valid 10-digit Indian mobile number.");
-      return;
-    }
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: toE164Indian(phone),
-      options: { data: { full_name: fullName.trim() } },
-    });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-      return;
-    }
-    setStep("otp");
-    setResendIn(RESEND_SECONDS);
-  }
-
-  async function verifyCode(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    if (!/^\d{6}$/.test(code)) {
-      setError("Enter the 6-digit code we texted you.");
-      return;
-    }
     setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({
-      phone: toE164Indian(phone),
-      token: code,
-      type: "sms",
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -106,65 +65,28 @@ export default function Login() {
 
       <div className="auth-form-side">
         <div className="auth-card">
-          {step === "phone" && (
-            <>
-              <h1>Welcome</h1>
-              <p className="sub">Sign in or create an account with your mobile number — no password needed.</p>
-              {error && <div className="auth-alert error">{error}</div>}
-              <form onSubmit={sendCode} noValidate>
-                <div className="field">
-                  <label htmlFor="fullName">Full name <span className="hint">(only needed the first time)</span></label>
-                  <input id="fullName" type="text" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-                </div>
-                <div className="field">
-                  <label htmlFor="phone">Mobile number</label>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <span style={{ display: "flex", alignItems: "center", padding: "0 12px", border: "1px solid var(--line)", borderRadius: 10, color: "var(--ink-soft)", fontSize: 14.5 }}>+91</span>
-                    <input
-                      id="phone" type="tel" inputMode="numeric" autoComplete="tel" maxLength={10}
-                      placeholder="98765 43210" value={phone}
-                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                      required
-                    />
-                  </div>
-                </div>
-                <button type="submit" className="btn-block" disabled={loading}>
-                  {loading ? "Sending code…" : "Send OTP"}
-                </button>
-              </form>
-            </>
-          )}
+          <h1>Welcome back</h1>
+          <p className="sub">Sign in to order and track your deliveries.</p>
 
-          {step === "otp" && (
-            <>
-              <h1>Enter the code</h1>
-              <p className="sub">We texted a 6-digit code to +91 {phone}.</p>
-              {error && <div className="auth-alert error">{error}</div>}
-              <form onSubmit={verifyCode} noValidate>
-                <div className="field">
-                  <label htmlFor="code">6-digit code</label>
-                  <input
-                    id="code" type="text" inputMode="numeric" maxLength={6} autoFocus
-                    placeholder="123456" value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    style={{ fontSize: 20, letterSpacing: 4, textAlign: "center" }}
-                  />
-                </div>
-                <button type="submit" className="btn-block" disabled={loading}>
-                  {loading ? "Verifying…" : "Verify & continue"}
-                </button>
-              </form>
-              <div className="auth-switch">
-                {resendIn > 0 ? (
-                  <span>Resend code in {resendIn}s</span>
-                ) : (
-                  <button type="button" className="back-link" onClick={sendCode} disabled={loading}>Resend code</button>
-                )}
-                {" · "}
-                <button type="button" className="back-link" onClick={() => { setStep("phone"); setError(""); }}>Change number</button>
-              </div>
-            </>
-          )}
+          {error && <div className="auth-alert error">{error}</div>}
+
+          <form onSubmit={handleSubmit} noValidate>
+            <div className="field">
+              <label htmlFor="email">Email</label>
+              <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="field">
+              <label htmlFor="password">Password</label>
+              <input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <button type="submit" className="btn-block" disabled={loading}>
+              {loading ? "Signing in…" : "Sign in"}
+            </button>
+          </form>
+
+          <div className="auth-switch">
+            New to Field to Family? <Link href={router.query.next ? `/signup?next=${router.query.next}` : "/signup"}>Create an account</Link>
+          </div>
         </div>
       </div>
     </div>

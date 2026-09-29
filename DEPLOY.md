@@ -40,11 +40,11 @@ This takes about 20–30 minutes the first time. You'll set up three free accoun
      only see their own data (row-level security), and sets up automatic profile creation
      when someone signs up.
    - You should see "Success. No rows returned."
-5. Go to **Authentication -> Providers** (left sidebar) and follow `PHONE_AUTH_SETUP.md`
-   in this project to connect Twilio for phone-number sign-in — the app no longer uses
-   email/password at all, so there's nothing to configure here for email.
-6. Once phone auth is working, see `ADMIN_SETUP.md` for the extra migrations that add the
-   products database, inventory, and the `/admin` dashboard.
+5. Go to **Authentication -> Providers** (left sidebar) and confirm **Email** is enabled
+   (it is by default). Nothing else to change here for now.
+6. Optional, for faster testing: go to **Authentication -> Sign In / Providers -> Email**
+   and turn **off** "Confirm email" so new accounts can sign in immediately without clicking
+   a confirmation link. You can turn this back on later for a real launch.
 7. Go to **Project Settings -> API** (left sidebar, gear icon). You'll need two values from
    this page in the next step:
    - **Project URL** (looks like `https://xxxxxxxxxxxx.supabase.co`)
@@ -92,7 +92,7 @@ This takes about 20–30 minutes the first time. You'll set up three free accoun
    git add .
    git commit -m "Initial commit: Field to Family"
    git branch -M main
-   git remote add origin https://github.com/YOUR-USERNAME/field-to-family.git
+   git remote add origin https://github.com/ruthvikreddyv/field-to-family.git
    git push -u origin main
    ```
    Replace `YOUR-USERNAME` with your actual GitHub username. If prompted, sign in with your
@@ -164,6 +164,5 @@ hours. Remember to also add the new domain to Supabase's **Site URL / Redirect U
 - **Orders don't appear in "My orders"**: open Supabase -> Table Editor -> orders and check
   a row was actually created; if not, check the browser console for the error Supabase
   returned (usually a row-level-security policy mismatch — re-run `supabase/schema.sql`).
-- **New sign-ups can't sign in right away**: this shouldn't happen with phone OTP (there's
-  no email confirmation step anymore) - if it does, check `PHONE_AUTH_SETUP.md`'s Twilio
-  troubleshooting notes instead.
+- **New sign-ups can't sign in right away**: "Confirm email" is likely still on — see Part 2,
+  step 6, or have users check their inbox for the confirmation link.

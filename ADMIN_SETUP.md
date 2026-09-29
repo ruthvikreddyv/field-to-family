@@ -1,9 +1,8 @@
 # Admin Dashboard — setup and how it works
 
 This covers the database-backed product/inventory system, the protected
-`/admin` area, and staff (Admin/Supervisor) accounts. For the phone-number
-login system itself, see `PHONE_AUTH_SETUP.md` first — do that setup before
-this one, since you need to be able to sign in before you can become staff.
+`/admin` area, and staff (Admin/Supervisor) accounts. Login is plain email +
+password (no SMS costs, no third-party provider needed).
 
 ## What changed from the original site
 
@@ -24,9 +23,9 @@ this one, since you need to be able to sign in before you can become staff.
   identical permissions, "Supervisor" is just a separate label for a second
   tier of staff. This is enforced by the database (row-level security), not
   just by hiding the menu link.
-- **A separate staff login at `/admin/login`.** It uses the same phone-OTP
+- **A separate staff login at `/admin/login`.** Same email/password
   mechanism as the customer login, but it never creates a new account — only
-  numbers already promoted to staff can get in.
+  accounts already promoted to staff can get in there.
 
 ## One-time database setup
 
@@ -40,23 +39,22 @@ Run these in order, in Supabase → SQL Editor:
 3. **`supabase/migration_roles_images.sql`** — adds the `role` column
    (customer/supervisor/admin), the product photo storage bucket, and drops
    the unused "today's harvest" column.
+4. **`supabase/migration_revert_email_auth.sql`** — run this too, it keeps
+   new-signup profiles reading from the email signup form correctly.
 
 ## Making yourself the first admin
 
-You must already have signed in once on the live site (so a `profiles` row
+You must already have signed up once on the live site (so a `profiles` row
 exists for you) before running this. In Supabase → SQL Editor, using the
-phone number you signed up with in `+91XXXXXXXXXX` format:
+email you signed up with:
 
 ```sql
 update public.profiles set role = 'admin'
-where id = (select id from auth.users where phone = '91XXXXXXXXXX');
+where id = (select id from auth.users where email = 'you@example.com');
 ```
 
-(Supabase stores the phone without the leading `+`, hence `91XXXXXXXXXX` not
-`+91XXXXXXXXXX`.)
-
 After that, go to **`/admin/login`** (not the regular `/login`) and sign in
-with that same number.
+with that same email and password.
 
 ## Adding more staff afterward
 
@@ -85,7 +83,7 @@ styles/globals.css
 ```
 
 Then test locally (`npm run dev`):
-1. Sign in with your own phone number (see `PHONE_AUTH_SETUP.md` for Twilio setup first)
+1. Sign up with a real email/password on the live site
 2. Run the "make yourself admin" SQL above
 3. Go to `/admin/login`, sign in again there
 4. In `/admin/products`, edit a vegetable and upload a real photo of it
@@ -95,8 +93,7 @@ Then test locally (`npm run dev`):
 8. In the Dashboard's Staff access panel, try adding a second staff member by phone number
 
 Then commit and push as usual — Vercel redeploys automatically. No new
-environment variables are needed for anything in this update; the Twilio
-setup lives entirely in the Supabase dashboard.
+environment variables are needed for anything in this update.
 
 ## How stock and availability interact
 

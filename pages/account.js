@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
-import { CONFIG, locateAndReverseGeocode, formatE164ForDisplay } from "../lib/products";
+import { CONFIG, locateAndReverseGeocode } from "../lib/products";
 import { PinIcon } from "../components/Icons";
 
 export default function Account() {
@@ -65,7 +65,7 @@ export default function Account() {
     <main className="page wrap">
       <div className="page-head">
         <h1>Your account</h1>
-        <p>Signed in as {formatE164ForDisplay(user.phone)}</p>
+        <p>Signed in as {user.email}</p>
       </div>
 
       <div className="card" style={{ maxWidth: 560 }}>

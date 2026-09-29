@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../lib/supabaseClient";
-import { formatE164ForDisplay } from "../lib/products";
 import { BasketIcon } from "./Icons";
 
 export default function Header() {
@@ -17,7 +16,7 @@ export default function Header() {
   }
 
   const isStaff = profile?.role === "admin" || profile?.role === "supervisor";
-  const initial = (profile?.full_name || formatE164ForDisplay(user?.phone) || "?").trim().charAt(0).toUpperCase();
+  const initial = (profile?.full_name || user?.email || "?").trim().charAt(0).toUpperCase();
 
   return (
     <header className="site">
@@ -44,7 +43,10 @@ export default function Header() {
               <button type="button" className="btn-outline" onClick={handleSignOut}>Sign out</button>
             </>
           ) : (
-            <Link href="/login" className="btn-primary">Sign in</Link>
+            <>
+              <Link href="/login" className="btn-outline">Sign in</Link>
+              <Link href="/signup" className="btn-primary">Sign up</Link>
+            </>
           )}
           <button className="basket-btn" onClick={() => openDrawer("cart")} aria-haspopup="dialog">
             <BasketIcon size={16} />
