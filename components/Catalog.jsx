@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useProducts } from "../context/ProductsContext";
 import { useCart } from "../context/CartContext";
+import { SearchIcon } from "./Icons";
 
 function ProduceRow({ item }) {
   const { addItem } = useCart();
@@ -18,14 +19,15 @@ function ProduceRow({ item }) {
 
   return (
     <div className="produce-row">
-      <div className="ic">{item.icon}</div>
+      <div className="thumb">
+        {item.image_url ? <img src={item.image_url} alt="" /> : <span>{item.name.charAt(0)}</span>}
+      </div>
       <div>
         <div className="produce-name">
           {item.name}{" "}
           <span className="produce-native">
             ({item.name_hi} · {item.name_te})
           </span>
-          {item.todays_harvest && <span className="badge season">🌾 Today's harvest</span>}
           {item.tags?.includes("organic") && <span className="badge organic">Organic</span>}
           {item.tags?.includes("season") && <span className="badge season">In season</span>}
         </div>
@@ -109,13 +111,15 @@ export default function Catalog() {
       </nav>
 
       <main className="page wrap" id="catalog">
-        <div className="field" style={{ maxWidth: 360, marginTop: 24 }}>
+        <div className="field" style={{ maxWidth: 360, marginTop: 24, position: "relative" }}>
+          <span style={{ position: "absolute", left: 13, top: 12, color: "var(--ink-soft)" }}><SearchIcon size={16} /></span>
           <input
             type="search"
             placeholder="Search vegetables… (English, Hindi or Telugu)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Search vegetables"
+            style={{ paddingLeft: 36 }}
           />
         </div>
 
@@ -124,7 +128,6 @@ export default function Catalog() {
 
         {!loading && filtered.length === 0 && (
           <div className="empty-state">
-            <div className="ic">🥕</div>
             No vegetables match your search right now.
           </div>
         )}

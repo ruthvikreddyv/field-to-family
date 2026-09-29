@@ -316,6 +316,20 @@ main.page { padding-bottom: 90px; min-height: 50vh; }
 .produce-list { border-top: 1px solid var(--line); }
 .produce-row { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .produce-row .ic { font-size: 22px; line-height: 1; }
+.thumb, .thumb-sm {
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--green-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green-deep);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.thumb img, .thumb-sm img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb { width: 48px; height: 48px; font-size: 19px; }
+.thumb-sm { width: 36px; height: 36px; font-size: 14px; }
 .produce-name { font-size: 15.5px; font-weight: 600; }
 .produce-native { font-weight: 400; color: var(--ink-soft); font-size: 13.5px; }
 .produce-meta { font-size: 13.5px; color: var(--ink-soft); margin-top: 2px; }

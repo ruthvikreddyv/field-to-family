@@ -1,10 +1,7 @@
 import Catalog from "../components/Catalog";
 import { CONFIG } from "../lib/products";
-import { useProducts } from "../context/ProductsContext";
 
 export default function Home() {
-  const { todaysHarvest } = useProducts();
-
   return (
     <>
       <div className="hero">
@@ -19,17 +16,9 @@ export default function Home() {
             <a href="#catalog" className="btn-primary">Start your order</a>
             <span className="hero-note">Minimum order ₹{CONFIG.minOrder} · Free delivery above ₹{CONFIG.freeDeliveryAbove}</span>
           </div>
-          {todaysHarvest.length > 0 && (
-            <div className="harvest-strip">
-              <span className="label">Today&apos;s harvest</span>
-              {todaysHarvest.map((it) => (
-                <span className="item" key={it.id}>
-                  <span className="ic">{it.icon}</span>
-                  {it.name}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="harvest-strip">
+            <span className="item">Everything below was harvested today — there's no "fresher" tier, this is all of it.</span>
+          </div>
         </div>
       </div>
 

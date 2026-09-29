@@ -14,15 +14,15 @@ export default function AdminLayout({ children }) {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
 
-  const isAdmin = !!profile?.is_admin;
+  const isStaff = profile?.role === "admin" || profile?.role === "supervisor";
 
   useEffect(() => {
     if (loading) return;
-    if (!user || !isAdmin) router.replace("/");
-  }, [loading, user, isAdmin, router]);
+    if (!user || !isStaff) router.replace("/admin/login");
+  }, [loading, user, isStaff, router]);
 
-  if (loading || !user || !isAdmin) {
-    return <div className="center-loading">Checking admin access…</div>;
+  if (loading || !user || !isStaff) {
+    return <div className="center-loading">Checking staff access…</div>;
   }
 
   return (

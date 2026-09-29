@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import AdminLayout from "../../components/AdminLayout";
 
@@ -6,10 +6,10 @@ const EMPTY_FORM = {
   id: null,
   name: "", name_hi: "", name_te: "",
   category: "", category_label: "",
-  icon: "🥬", price: "", unit: "kg",
+  image_url: "", price: "", unit: "kg",
   stock: "", low_stock_threshold: "5",
   active: true, manually_unavailable: false,
-  featured: false, todays_harvest: false,
+  featured: false,
   organic: false, season: false,
 };
 
@@ -20,6 +20,8 @@ export default function AdminProducts() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   async function load() {
     setLoading(true);
@@ -42,10 +44,10 @@ export default function AdminProducts() {
       id: p.id,
       name: p.name, name_hi: p.name_hi || "", name_te: p.name_te || "",
       category: p.category, category_label: p.category_label,
-      icon: p.icon || "🥬", price: String(p.price), unit: p.unit,
+      image_url: p.image_url || "", price: String(p.price), unit: p.unit,
       stock: String(p.stock), low_stock_threshold: String(p.low_stock_threshold),
       active: p.active, manually_unavailable: p.manually_unavailable,
-      featured: p.featured, todays_harvest: p.todays_harvest,
+      featured: p.featured,
       organic: (p.tags || []).includes("organic"), season: (p.tags || []).includes("season"),
     });
     setFormOpen(true);
@@ -56,6 +58,23 @@ export default function AdminProducts() {
     setForm(EMPTY_FORM);
     setFormOpen(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function handlePhotoChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError("");
+    const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-]/g, "_")}`;
+    const { error: upErr } = await supabase.storage.from("product-images").upload(path, file, { upsert: true });
+    if (upErr) {
+      setUploading(false);
+      setError("Photo upload failed: " + upErr.message);
+      return;
+    }
+    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+    setForm((f) => ({ ...f, image_url: data.publicUrl }));
+    setUploading(false);
   }
 
   async function handleSave(e) {
@@ -70,7 +89,7 @@ export default function AdminProducts() {
       name_te: form.name_te.trim(),
       category: form.category.trim().toLowerCase().replace(/\s+/g, "-"),
       category_label: form.category_label.trim() || form.category.trim(),
-      icon: form.icon.trim() || "🥬",
+      image_url: form.image_url.trim() || null,
       price: parseFloat(form.price) || 0,
       unit: form.unit.trim(),
       stock: parseInt(form.stock, 10) || 0,
@@ -79,7 +98,6 @@ export default function AdminProducts() {
       manually_unavailable: form.manually_unavailable,
       available: !form.manually_unavailable && (parseInt(form.stock, 10) || 0) > 0,
       featured: form.featured,
-      todays_harvest: form.todays_harvest,
       tags,
     };
 
@@ -115,9 +133,23 @@ export default function AdminProducts() {
         <div className="card">
           <h2>{form.id ? "Edit product" : "Add product"}</h2>
           <form onSubmit={handleSave} noValidate>
+            <div className="field">
+              <label>Photo</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div className="thumb" style={{ width: 64, height: 64, fontSize: 24 }}>
+                  {form.image_url ? <img src={form.image_url} alt="" /> : <span>{(form.name || "?").charAt(0)}</span>}
+                </div>
+                <div>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} disabled={uploading} style={{ fontSize: 13 }} />
+                  <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "4px 0 0" }}>
+                    {uploading ? "Uploading…" : "Upload a real photo of this vegetable — a phone photo is fine."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="field-row">
               <div className="field"><label>Name (English)</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
-              <div className="field"><label>Icon (emoji)</label><input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} style={{ maxWidth: 80 }} /></div>
             </div>
             <div className="field-row">
               <div className="field"><label>Hindi name</label><input value={form.name_hi} onChange={(e) => setForm({ ...form, name_hi: e.target.value })} /></div>
@@ -151,14 +183,13 @@ export default function AdminProducts() {
                 <Checkbox label="Active (visible in catalog)" checked={form.active} onChange={(v) => setForm({ ...form, active: v })} />
                 <Checkbox label="Manually mark unavailable" checked={form.manually_unavailable} onChange={(v) => setForm({ ...form, manually_unavailable: v })} />
                 <Checkbox label="Featured" checked={form.featured} onChange={(v) => setForm({ ...form, featured: v })} />
-                <Checkbox label="Today's harvest" checked={form.todays_harvest} onChange={(v) => setForm({ ...form, todays_harvest: v })} />
                 <Checkbox label="Organic" checked={form.organic} onChange={(v) => setForm({ ...form, organic: v })} />
                 <Checkbox label="In season" checked={form.season} onChange={(v) => setForm({ ...form, season: v })} />
               </div>
             </div>
 
             <div style={{ display: "flex", gap: 10 }}>
-              <button type="submit" className="btn-primary" disabled={saving}>{saving ? "Saving…" : "Save product"}</button>
+              <button type="submit" className="btn-primary" disabled={saving || uploading}>{saving ? "Saving…" : "Save product"}</button>
               <button type="button" className="btn-outline" onClick={() => { setFormOpen(false); setForm(EMPTY_FORM); }}>Cancel</button>
             </div>
           </form>
@@ -182,7 +213,14 @@ export default function AdminProducts() {
             <tbody>
               {products.map((p) => (
                 <tr key={p.id} style={{ borderBottom: "1px solid var(--line)", opacity: p.active ? 1 : 0.5 }}>
-                  <td style={{ padding: "8px 6px" }}>{p.icon} {p.name} <span style={{ color: "var(--ink-soft)" }}>({p.name_hi} · {p.name_te})</span></td>
+                  <td style={{ padding: "8px 6px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div className="thumb-sm">
+                        {p.image_url ? <img src={p.image_url} alt="" /> : <span>{p.name.charAt(0)}</span>}
+                      </div>
+                      <span>{p.name} <span style={{ color: "var(--ink-soft)" }}>({p.name_hi} · {p.name_te})</span></span>
+                    </div>
+                  </td>
                   <td style={{ padding: "8px 6px" }}>{p.category_label}</td>
                   <td style={{ padding: "8px 6px" }}>₹{p.price}/{p.unit}</td>
                   <td style={{ padding: "8px 6px" }}>{p.stock}</td>

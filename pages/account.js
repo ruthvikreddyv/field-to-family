@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
-import { CONFIG, locateAndReverseGeocode } from "../lib/products";
+import { CONFIG, locateAndReverseGeocode, formatE164ForDisplay } from "../lib/products";
+import { PinIcon } from "../components/Icons";
 
 export default function Account() {
   const router = useRouter();
@@ -64,7 +65,7 @@ export default function Account() {
     <main className="page wrap">
       <div className="page-head">
         <h1>Your account</h1>
-        <p>Signed in as {user.email}</p>
+        <p>Signed in as {formatE164ForDisplay(user.phone)}</p>
       </div>
 
       <div className="card" style={{ maxWidth: 560 }}>
@@ -85,11 +86,11 @@ export default function Account() {
           <button
             type="button"
             className="btn-outline"
-            style={{ width: "100%", marginBottom: 16, fontSize: 13.5 }}
+            style={{ width: "100%", marginBottom: 16, fontSize: 13.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
             onClick={handleUseLocation}
             disabled={locating}
           >
-            {locating ? "Finding your location…" : "📍 Use my current location"}
+            {locating ? "Finding your location…" : (<><PinIcon size={14} /> Use my current location</>)}
           </button>
           {locateError && <div className="form-error" style={{ marginTop: -10 }}>{locateError}</div>}
           {form.latitude && (

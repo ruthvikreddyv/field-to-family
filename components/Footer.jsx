@@ -27,6 +27,7 @@ export default function Footer() {
       </div>
       <div className="wrap legal">
         Field to Family — vegetable delivery in Hyderabad only, for now. Prices and availability change with the season.
+        {" · "}<a href="/admin/login" style={{ color: "inherit", textDecoration: "underline" }}>Staff sign in</a>
       </div>
     </footer>
   );

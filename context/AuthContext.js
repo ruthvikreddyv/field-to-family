@@ -4,8 +4,6 @@ import { supabase } from "../lib/supabaseClient";
 const AuthContext = createContext({
   user: null,
   profile: null,
-
-  
   loading: true,
   refreshProfile: () => {},
 });

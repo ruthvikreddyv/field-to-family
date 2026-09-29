@@ -40,13 +40,8 @@ export function ProductsProvider({ children }) {
     return Array.from(map.values());
   }, [products]);
 
-  const todaysHarvest = useMemo(
-    () => products.filter((p) => p.active && p.todays_harvest).slice(0, 5),
-    [products]
-  );
-
   return (
-    <ProductsContext.Provider value={{ products, loading, error, refetch: fetchProducts, getProduct, byCategory, todaysHarvest }}>
+    <ProductsContext.Provider value={{ products, loading, error, refetch: fetchProducts, getProduct, byCategory }}>
       {children}
     </ProductsContext.Provider>
   );

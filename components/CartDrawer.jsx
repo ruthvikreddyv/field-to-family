@@ -4,6 +4,7 @@ import { useCart, useCartLines } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 import { CONFIG, joinAddress, locateAndReverseGeocode } from "../lib/products";
+import { BasketIcon, PinIcon } from "./Icons";
 
 function buildOrderText(order) {
   const lines = order.lines
@@ -62,7 +63,7 @@ export default function CartDrawer() {
         longitude: profile.longitude ?? f.longitude,
       }));
     } else if (user) {
-      setForm((f) => ({ ...f, name: f.name || user.email }));
+      setForm((f) => ({ ...f, phone: f.phone || (user.phone || "").replace(/\D/g, "").slice(-10) }));
     }
   }, [profile, user]);
 
@@ -178,14 +179,20 @@ export default function CartDrawer() {
           {drawerStep === "cart" && (
             lines.length === 0 ? (
               <div className="empty-basket">
-                <div className="ic">🧺</div>
-                Your basket is empty.<br />Add some vegetables to get started.
+                <BasketIcon size={36} />
+                <div style={{ marginTop: 10 }}>Your basket is empty.<br />Add some vegetables to get started.</div>
               </div>
             ) : (
               <>
                 {lines.map((l) => (
                   <div className="basket-row" key={l.item.id}>
-                    <div className="ic">{l.item.icon}</div>
+                    <div className="thumb-sm">
+                      {l.item.image_url ? (
+                        <img src={l.item.image_url} alt="" />
+                      ) : (
+                        <span>{l.item.name.charAt(0)}</span>
+                      )}
+                    </div>
                     <div className="info">
                       <div className="name">{l.item.name}</div>
                       <div className="unit-price">₹{l.item.price} / {l.item.unit}</div>
@@ -227,11 +234,11 @@ export default function CartDrawer() {
                 <button
                   type="button"
                   className="btn-outline"
-                  style={{ width: "100%", marginBottom: 10, fontSize: 13.5 }}
+                  style={{ width: "100%", marginBottom: 10, fontSize: 13.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
                   onClick={handleUseLocation}
                   disabled={locating}
                 >
-                  {locating ? "Finding your location…" : "📍 Use my current location"}
+                  {locating ? "Finding your location…" : (<><PinIcon size={14} /> Use my current location</>)}
                 </button>
                 {locateError && <div className="form-error" style={{ marginTop: -4 }}>{locateError}</div>}
                 {form.latitude && (
@@ -294,7 +301,7 @@ export default function CartDrawer() {
           {drawerStep === "confirm" && lastOrder && (
             <>
               <div className="confirm-wrap">
-                <div className="ic">🧺</div>
+                <div style={{ display: "flex", justifyContent: "center", color: "var(--green-mid)" }}><BasketIcon size={40} /></div>
                 <h3>Order saved to your account</h3>
                 <div className="oid">Order {lastOrder.order_code} · ₹{lastOrder.total}</div>
               </div>

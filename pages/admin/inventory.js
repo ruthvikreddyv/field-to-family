@@ -39,8 +39,13 @@ export default function AdminInventory() {
           const statusColor = p.stock <= 0 ? "var(--tomato)" : p.stock <= p.low_stock_threshold ? "var(--turmeric-d)" : "var(--green-mid)";
           return (
             <div key={p.id} style={{ borderBottom: "1px solid var(--line)", padding: "16px 0" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
-                <div style={{ fontWeight: 600, fontSize: 15 }}>{p.icon} {p.name} <span style={{ fontWeight: 400, color: "var(--ink-soft)", fontSize: 13 }}>₹{p.price}/{p.unit}</span></div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 600, fontSize: 15 }}>
+                  <div className="thumb-sm">
+                    {p.image_url ? <img src={p.image_url} alt="" /> : <span>{p.name.charAt(0)}</span>}
+                  </div>
+                  {p.name} <span style={{ fontWeight: 400, color: "var(--ink-soft)", fontSize: 13 }}>₹{p.price}/{p.unit}</span>
+                </div>
                 <span style={{ fontSize: 12.5, fontWeight: 600, color: statusColor }}>{status}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>

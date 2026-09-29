@@ -1,41 +1,33 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { supabase } from "../lib/supabaseClient";
-import { useAuth } from "../context/AuthContext";
-import { useCart } from "../context/CartContext";
-import { CONFIG, toE164Indian, isValidIndianMobile } from "../lib/products";
+import { supabase } from "../../lib/supabaseClient";
+import { useAuth } from "../../context/AuthContext";
+import { toE164Indian, isValidIndianMobile } from "../../lib/products";
 
 const RESEND_SECONDS = 30;
 
-export default function Login() {
+export default function StaffLogin() {
   const router = useRouter();
-  const { user } = useAuth();
-  const { openDrawer } = useCart();
-
-  const [step, setStep] = useState("phone"); // 'phone' | 'otp'
-  const [fullName, setFullName] = useState("");
+  const { user, profile, loading: authLoading, refreshProfile } = useAuth();
+  const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendIn, setResendIn] = useState(0);
-  const timerRef = useRef(null);
 
   useEffect(() => {
-    if (user) {
-      if (router.query.next === "checkout") {
-        router.replace("/").then(() => openDrawer("checkout"));
-      } else {
-        router.replace("/");
+    if (!authLoading && user && profile) {
+      if (profile.role === "admin" || profile.role === "supervisor") {
+        router.replace("/admin");
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [authLoading, user, profile, router]);
 
   useEffect(() => {
     if (resendIn <= 0) return;
-    timerRef.current = setTimeout(() => setResendIn((s) => s - 1), 1000);
-    return () => clearTimeout(timerRef.current);
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
   }, [resendIn]);
 
   async function sendCode(e) {
@@ -46,13 +38,19 @@ export default function Login() {
       return;
     }
     setLoading(true);
+    // shouldCreateUser: false - staff accounts must already exist and be
+    // promoted by an existing admin. This login never creates a new account.
     const { error } = await supabase.auth.signInWithOtp({
       phone: toE164Indian(phone),
-      options: { data: { full_name: fullName.trim() } },
+      options: { shouldCreateUser: false },
     });
     setLoading(false);
     if (error) {
-      setError(error.message);
+      setError(
+        error.message.includes("not found") || error.status === 400
+          ? "No account found with that number. Ask an admin to add you as staff first."
+          : error.message
+      );
       return;
     }
     setStep("otp");
@@ -67,21 +65,30 @@ export default function Login() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({
+    const { error: verifyError } = await supabase.auth.verifyOtp({
       phone: toE164Indian(phone),
       token: code,
       type: "sms",
     });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
+    if (verifyError) {
+      setLoading(false);
+      setError(verifyError.message);
       return;
     }
-    if (router.query.next === "checkout") {
-      router.replace("/").then(() => openDrawer("checkout"));
-    } else {
-      router.replace("/");
+
+    // Verified - but only staff accounts belong on this page.
+    const { data: { user: signedInUser } } = await supabase.auth.getUser();
+    const { data: prof } = await supabase.from("profiles").select("role").eq("id", signedInUser.id).single();
+    setLoading(false);
+
+    if (!prof || prof.role === "customer") {
+      await supabase.auth.signOut();
+      setError("This account doesn't have staff access. Sign in as a regular customer instead, or ask an admin to add you as staff.");
+      setStep("phone");
+      return;
     }
+    refreshProfile();
+    router.replace("/admin");
   }
 
   return (
@@ -91,16 +98,13 @@ export default function Login() {
           <div className="wordmark" style={{ color: "var(--paper)", marginBottom: 50 }}>
             Field to Family
           </div>
-          <p className="quote">
-            &ldquo;We used to wonder what would be fresh when it arrived. Now we just wonder what to
-            cook with it.&rdquo;
-          </p>
-          <div className="quote-by">— a family in Gachibowli, ordering since last season</div>
+          <p className="quote">Staff sign in</p>
+          <div className="quote-by">For Admins and Supervisors only.</div>
         </div>
         <div className="badges">
-          <span className="abadge">Cut the same morning</span>
-          <span className="abadge">Delivered in {CONFIG.city}</span>
-          <span className="abadge">30+ vegetables</span>
+          <span className="abadge">Products &amp; pricing</span>
+          <span className="abadge">Inventory</span>
+          <span className="abadge">Orders</span>
         </div>
       </div>
 
@@ -108,20 +112,16 @@ export default function Login() {
         <div className="auth-card">
           {step === "phone" && (
             <>
-              <h1>Welcome</h1>
-              <p className="sub">Sign in or create an account with your mobile number — no password needed.</p>
+              <h1>Staff sign in</h1>
+              <p className="sub">Enter the mobile number your account was set up with.</p>
               {error && <div className="auth-alert error">{error}</div>}
               <form onSubmit={sendCode} noValidate>
-                <div className="field">
-                  <label htmlFor="fullName">Full name <span className="hint">(only needed the first time)</span></label>
-                  <input id="fullName" type="text" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-                </div>
                 <div className="field">
                   <label htmlFor="phone">Mobile number</label>
                   <div style={{ display: "flex", gap: 8 }}>
                     <span style={{ display: "flex", alignItems: "center", padding: "0 12px", border: "1px solid var(--line)", borderRadius: 10, color: "var(--ink-soft)", fontSize: 14.5 }}>+91</span>
                     <input
-                      id="phone" type="tel" inputMode="numeric" autoComplete="tel" maxLength={10}
+                      id="phone" type="tel" inputMode="numeric" maxLength={10}
                       placeholder="98765 43210" value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                       required
@@ -155,13 +155,9 @@ export default function Login() {
                 </button>
               </form>
               <div className="auth-switch">
-                {resendIn > 0 ? (
-                  <span>Resend code in {resendIn}s</span>
-                ) : (
-                  <button type="button" className="back-link" onClick={sendCode} disabled={loading}>Resend code</button>
+                {resendIn > 0 ? <span>Resend code in {resendIn}s</span> : (
+                  <button type="button" className="back-link" onClick={sendCode}>Resend code</button>
                 )}
-                {" · "}
-                <button type="button" className="back-link" onClick={() => { setStep("phone"); setError(""); }}>Change number</button>
               </div>
             </>
           )}
