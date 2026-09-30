@@ -48,22 +48,6 @@ You must already have signed up once on the live site (so a `profiles` row
 exists for you) before running this. In Supabase → SQL Editor, using the
 email you signed up with:
 
-```sql
-update public.profiles set role = 'admin'
-where id = (select id from auth.users where email = 'you@example.com');
-```
-
-After that, go to **`/admin/login`** (not the regular `/login`) and sign in
-with that same email and password.
-
-## Adding more staff afterward
-
-Once you're an admin, you don't need SQL anymore — the Dashboard has a
-**Staff access** panel where you can:
-- See everyone with Admin or Supervisor access
-- Add a new staff member by their mobile number (they must have already
-  signed up as a regular customer first — the panel just promotes an
-  existing account)
 - Remove someone's staff access, returning them to a normal customer account
 
 ## Replacing project files
