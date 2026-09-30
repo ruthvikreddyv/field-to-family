@@ -7,16 +7,7 @@ This takes about 20–30 minutes the first time. You'll set up three free accoun
 
 ## Part 1 — Get the code ready on your computer
 
-1. Unzip the file you downloaded (`field-to-family.zip`) somewhere on your computer,
-   e.g. `Desktop/field-to-family`.
-2. Install [Node.js](https://nodejs.org) (version 18 or later) if you don't have it —
-   download the "LTS" installer for your OS and run it.
-3. Install [Git](https://git-scm.com/downloads) if you don't have it.
-4. Open a terminal (Command Prompt / PowerShell on Windows, Terminal on Mac) and go into
-   the project folder:
-   ```bash
-   cd Desktop/field-to-family
-   ```
+1. U
 5. Install the project's dependencies:
    ```bash
    npm install
