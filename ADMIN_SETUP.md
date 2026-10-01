@@ -1,9 +1,5 @@
 # Admin Dashboard — setup and how it works
 
-This covers the database-backed product/inventory system, the protected
-`/admin` area, and staff (Admin/Supervisor) accounts. Login is plain email +
-password (no SMS costs, no third-party provider needed).
-
 ## What changed from the original site
 
 - **Products, prices, and stock live in Supabase**, not in the code. The
