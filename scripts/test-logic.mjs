@@ -7,6 +7,7 @@ import * as O from "../lib/order.mjs";
 import { suggest, lookupPin, cleanPin, PINCODES } from "../lib/pincodes.mjs";
 
 const products = FALLBACK_PRODUCTS.map((p) => ({ ...p, available: true, image: "" }));
+const N = products.length;
 const veg = (id) => products.find((p) => p.id === id);
 
 // totals
@@ -54,9 +55,11 @@ assert.equal(lookupPin("500081").ok, true); assert.equal(lookupPin("500099").ok,
 assert.equal(lookupPin("500101").ok, false); assert.equal(lookupPin("110001").ok, false); assert.equal(lookupPin("50").partial, true);
 assert.equal(new Set(PINCODES.map((p) => p[0])).size, PINCODES.length);
 // new catalog
-assert.ok(products.length >= 60);
+assert.ok(products.length >= 70);
 assert.equal(new Set(products.map((p) => p.id)).size, products.length);
-assert.ok(products.filter((p) => p.category === "Chicken").length >= 6 && products.filter((p) => p.category === "Mutton").length >= 5);
+assert.ok(!products.some((p) => /chicken|mutton/i.test(p.category + p.name)), "no non-veg");
+assert.ok(products.filter((p) => p.category === "Fruits").length >= 12);
+for (const need of ["bachalakura","chukkakura","koyigura","roundsorakaya","dosakaya","dondakayahybrid","gokarakayalocal","gokarakayahybrid","chikkudukayahybrid","custardapple"]) assert.ok(products.find((p) => p.id === need), need);
 assert.ok(products.every((p) => p.te && p.hi && p.price > 0));
 assert.equal(CONFIG.freeDeliveryAbove, 299);
 assert.equal(O.priceBreakdown(298, CONFIG).delivery, 30); assert.equal(O.priceBreakdown(299, CONFIG).delivery, 0);
@@ -73,7 +76,8 @@ class Sheet {
       getValues: () => me.rows.slice(r - 1, r - 1 + nr).map((row) => row.slice(c - 1, c - 1 + nc)),
       setValues: (v) => v.forEach((row, i) => { me.rows[r - 1 + i] = me.rows[r - 1 + i] || []; row.forEach((x, j) => { me.rows[r - 1 + i][c - 1 + j] = x; }); }),
       setValue: (x) => { me.rows[r - 1][c - 1] = x; },
-      insertCheckboxes() {},
+      getValue: () => me.rows[r - 1][c - 1],
+      insertCheckboxes() { if (me.typed) throw new Error("This operation is not allowed on cells in typed columns."); },
     };
   }
   appendRow(row) { this.rows.push(row); }
@@ -86,6 +90,7 @@ const ctx = {
   SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: (n) => sheets[n] }) },
   LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
   Utilities: { sleep() {} },
+  Logger: { log() {} },
   ContentService: { MimeType: { JSON: "json" }, createTextOutput: (t) => ({ t, setMimeType() { return this; } }) },
   JSON, String, Number, Math, Date, Error, Array,
 };
@@ -96,11 +101,11 @@ const post = (o) => JSON.parse(vm.runInContext("doPost", ctx)({ postData: { cont
 const getP = () => JSON.parse(vm.runInContext("doGet", ctx)().t).products;
 const orders = () => ordSheet.rows.slice(1);
 
-assert.equal(getP().length, 68);
+assert.equal(getP().length, N);
 prodSheet.rows[1][2] = false;                       // untick "In stock" -> hidden
-assert.equal(getP().length, 67); assert.ok(!getP().find((p) => p.id === FALLBACK_PRODUCTS[0].id));
+assert.equal(getP().length, N - 1); assert.ok(!getP().find((p) => p.id === FALLBACK_PRODUCTS[0].id));
 prodSheet.rows[1][2] = true; prodSheet.rows[2][1] = false; // untick "Show" -> hidden
-assert.equal(getP().length, 67); prodSheet.rows[2][1] = true;
+assert.equal(getP().length, N - 1); prodSheet.rows[2][1] = true;
 
 const ok = { orderId: "F2F-1", name: "=HYPERLINK(1)", phone: "9014346193", address: "x", area: "y", items: [{ id: "potato", qty: 1.5 }, { id: "fake", qty: 1 }] };
 assert.equal(post(ok).ok, true); assert.equal(orders().length, 1);
@@ -117,7 +122,7 @@ assert.match(post({ action: "list", pw: "x" }).error, /change ADMIN_PASSWORD/);
 vm.runInContext('ADMIN_PASSWORD = "secret123"', ctx);
 assert.equal(post({ action: "list", pw: "nope" }).error, "Wrong password");
 const L = post({ action: "list", pw: "secret123" });
-assert.equal(L.ok, true); assert.equal(L.products.length, 68); assert.equal(L.orders.length, 2);
+assert.equal(L.ok, true); assert.equal(L.products.length, N); assert.equal(L.orders.length, 2);
 assert.equal(L.orders[0].orderId, "F2F-5".replace("F2F-", "F")); // newest first
 assert.equal(L.orders[0].status, "New");
 let r = post({ action: "setStatus", pw: "secret123", orderId: "F5", status: "Delivered" });
@@ -132,15 +137,26 @@ r = post({ action: "saveProducts", pw: "secret123", products: [{ ...potato, pric
 assert.equal(getP().find((p) => p.id === "potato").price, 55);
 // add new + delete
 r = post({ action: "saveProducts", pw: "secret123", products: [{ id: "drumstick-123", name: "Drumstick", te: "మునగకాయ", hi: "सहजन", category: "Gourds", price: 80, unit: "kg", show: true }] });
-assert.equal(getP().length, 69); assert.equal(r.products.length, 69);
+assert.equal(getP().length, N + 1); assert.equal(r.products.length, N + 1);
 assert.equal(post({ action: "saveProducts", pw: "secret123", products: [{ id: "bad", name: "Bad", price: 0, show: true }] }).ok, false);
 r = post({ action: "deleteProduct", pw: "secret123", id: "drumstick-123" });
-assert.equal(getP().length, 68);
+assert.equal(getP().length, N);
+prodSheet.typed = true;                                 // simulate a Sheets "table" with typed columns
 // addMissingProducts: older sheet gets only the new items
 prodSheet.rows.splice(1);                               // pretend an old sheet with 2 items
 prodSheet.rows.push(["spinach", true, true, "Leafy greens", "Spinach", "", "", 99, "bunch", ""], ["potato", true, true, "Roots & tubers", "Potato", "", "", 77, "kg", ""]);
-assert.equal(vm.runInContext("addMissingProducts", ctx)(), 66);
+assert.equal(vm.runInContext("addMissingProducts", ctx)(), N - 2);
 assert.equal(prodSheet.rows.filter((r) => r[0] === "spinach").length, 1);
 assert.equal(prodSheet.rows.find((r) => r[0] === "potato")[7], 77);   // your price kept
 assert.equal(vm.runInContext("addMissingProducts", ctx)(), 0);
+// updateProducts: removes non-veg rows, renames, adds missing
+prodSheet.rows.splice(1);
+prodSheet.rows.push(["chickencurry", true, true, "Chicken", "Chicken curry", "", "", 240, "kg", ""], ["ivygourd", true, true, "Gourds & squashes", "Ivy gourd (Tindora)", "x", "y", 55, "kg", ""], ["muttoncurry", true, true, "Mutton", "Mutton curry", "", "", 900, "kg", ""], ["cucumber", true, true, "Gourds & squashes", "Cucumber", "old", "खीरा", 30, "kg", ""]);
+vm.runInContext("updateProducts", ctx)();
+assert.ok(!prodSheet.rows.some((r) => /chicken|mutton/i.test(r[3])));
+assert.equal(prodSheet.rows.find((r) => r[0] === "ivygourd")[4], "Dondakaya - Local (Ivy gourd)");
+assert.equal(prodSheet.rows.find((r) => r[0] === "ivygourd")[7], 55);
+assert.equal(prodSheet.rows.find((r) => r[0] === "cucumber")[5], "కీర దోసకాయ");
+assert.ok(prodSheet.rows.find((r) => r[0] === "custardapple"));
+assert.equal(prodSheet.rows.length - 1, N);
 console.log("all logic tests passed");

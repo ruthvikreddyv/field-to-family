@@ -108,6 +108,33 @@ var SEED = [
   "unit": "bunch"
  },
  {
+  "id": "bachalakura",
+  "category": "Leafy greens",
+  "name": "Bachala kura (Malabar spinach)",
+  "hi": "पोई साग",
+  "te": "బచ్చలికూర",
+  "price": 30,
+  "unit": "bunch"
+ },
+ {
+  "id": "chukkakura",
+  "category": "Leafy greens",
+  "name": "Chukka kura (Sukka kura)",
+  "hi": "खट्टा पालक (चुक्का)",
+  "te": "చుక్కకూర",
+  "price": 25,
+  "unit": "bunch"
+ },
+ {
+  "id": "koyigura",
+  "category": "Leafy greens",
+  "name": "Koyi gura",
+  "hi": "कोयिगूरा",
+  "te": "కోయిగూర",
+  "price": 25,
+  "unit": "bunch"
+ },
+ {
   "id": "potato",
   "category": "Roots & tubers",
   "name": "Potato",
@@ -247,7 +274,7 @@ var SEED = [
   "category": "Gourds & squashes",
   "name": "Cucumber",
   "hi": "खीरा",
-  "te": "దోసకాయ",
+  "te": "కీర దోసకాయ",
   "price": 30,
   "unit": "kg"
  },
@@ -272,10 +299,37 @@ var SEED = [
  {
   "id": "ivygourd",
   "category": "Gourds & squashes",
-  "name": "Ivy gourd (Tindora)",
+  "name": "Dondakaya - Local (Ivy gourd)",
   "hi": "कुंदरू",
   "te": "దొండకాయ",
   "price": 50,
+  "unit": "kg"
+ },
+ {
+  "id": "roundsorakaya",
+  "category": "Gourds & squashes",
+  "name": "Round sorakaya (Round bottle gourd)",
+  "hi": "गोल लौकी",
+  "te": "గుండ్రటి సొరకాయ",
+  "price": 40,
+  "unit": "piece"
+ },
+ {
+  "id": "dosakaya",
+  "category": "Gourds & squashes",
+  "name": "Dosakaya (Yellow cucumber)",
+  "hi": "पीला खीरा",
+  "te": "దోసకాయ",
+  "price": 40,
+  "unit": "kg"
+ },
+ {
+  "id": "dondakayahybrid",
+  "category": "Gourds & squashes",
+  "name": "Dondakaya - Hybrid (Ivy gourd)",
+  "hi": "कुंदरू (हाइब्रिड)",
+  "te": "దొండకాయ (హైబ్రిడ్)",
+  "price": 45,
   "unit": "kg"
  },
  {
@@ -380,7 +434,7 @@ var SEED = [
  {
   "id": "broadbeans",
   "category": "Everyday vegetables",
-  "name": "Broad beans",
+  "name": "Chikkudukaya - Local (Broad beans)",
   "hi": "सेम फली",
   "te": "చిక్కుడుకాయ",
   "price": 70,
@@ -439,6 +493,33 @@ var SEED = [
   "te": "అరటి పువ్వు",
   "price": 30,
   "unit": "piece"
+ },
+ {
+  "id": "gokarakayalocal",
+  "category": "Everyday vegetables",
+  "name": "Gokarakaya - Local",
+  "hi": "गोकरकाया (देसी)",
+  "te": "గోకరకాయ (నాటు)",
+  "price": 60,
+  "unit": "kg"
+ },
+ {
+  "id": "gokarakayahybrid",
+  "category": "Everyday vegetables",
+  "name": "Gokarakaya - Hybrid",
+  "hi": "गोकरकाया (हाइब्रिड)",
+  "te": "గోకరకాయ (హైబ్రిడ్)",
+  "price": 50,
+  "unit": "kg"
+ },
+ {
+  "id": "chikkudukayahybrid",
+  "category": "Everyday vegetables",
+  "name": "Chikkudukaya - Hybrid (Broad beans)",
+  "hi": "सेम फली (हाइब्रिड)",
+  "te": "చిక్కుడుకాయ (హైబ్రిడ్)",
+  "price": 60,
+  "unit": "kg"
  },
  {
   "id": "broccoli",
@@ -504,129 +585,129 @@ var SEED = [
   "unit": "packet"
  },
  {
-  "id": "chickencurry",
-  "category": "Chicken",
-  "name": "Chicken curry cut (with skin)",
-  "hi": "चिकन करी कट",
-  "te": "చికెన్ కర్రీ కట్",
-  "price": 240,
+  "id": "banana",
+  "category": "Fruits",
+  "name": "Banana",
+  "hi": "केला",
+  "te": "అరటిపండు",
+  "price": 60,
+  "unit": "dozen"
+ },
+ {
+  "id": "apple",
+  "category": "Fruits",
+  "name": "Apple",
+  "hi": "सेब",
+  "te": "ఆపిల్",
+  "price": 180,
   "unit": "kg"
  },
  {
-  "id": "chickenskinless",
-  "category": "Chicken",
-  "name": "Skinless chicken curry cut",
-  "hi": "स्किनलेस चिकन",
-  "te": "స్కిన్‌లెస్ చికెన్",
-  "price": 270,
+  "id": "orange",
+  "category": "Fruits",
+  "name": "Orange",
+  "hi": "संतरा",
+  "te": "నారింజ",
+  "price": 90,
   "unit": "kg"
  },
  {
-  "id": "chickenboneless",
-  "category": "Chicken",
-  "name": "Boneless chicken",
-  "hi": "बोनलेस चिकन",
-  "te": "బోన్‌లెస్ చికెన్",
-  "price": 380,
+  "id": "mosambi",
+  "category": "Fruits",
+  "name": "Sweet lime (Mosambi)",
+  "hi": "मौसंबी",
+  "te": "బత్తాయి",
+  "price": 80,
   "unit": "kg"
  },
  {
-  "id": "chickenlegs",
-  "category": "Chicken",
-  "name": "Chicken leg pieces",
-  "hi": "चिकन लेग",
-  "te": "చికెన్ లెగ్స్",
-  "price": 280,
+  "id": "pomegranate",
+  "category": "Fruits",
+  "name": "Pomegranate",
+  "hi": "अनार",
+  "te": "దానిమ్మ",
+  "price": 160,
   "unit": "kg"
  },
  {
-  "id": "chickenwings",
-  "category": "Chicken",
-  "name": "Chicken wings",
-  "hi": "चिकन विंग्स",
-  "te": "చికెన్ వింగ్స్",
-  "price": 220,
+  "id": "papaya",
+  "category": "Fruits",
+  "name": "Papaya",
+  "hi": "पपीता",
+  "te": "బొప్పాయి",
+  "price": 50,
   "unit": "kg"
  },
  {
-  "id": "chickenkeema",
-  "category": "Chicken",
-  "name": "Chicken mince (keema)",
-  "hi": "चिकन कीमा",
-  "te": "చికెన్ కైమా",
-  "price": 340,
+  "id": "watermelon",
+  "category": "Fruits",
+  "name": "Watermelon",
+  "hi": "तरबूज",
+  "te": "పుచ్చకాయ",
+  "price": 30,
   "unit": "kg"
  },
  {
-  "id": "chickenliver",
-  "category": "Chicken",
-  "name": "Chicken liver",
-  "hi": "चिकन कलेजी",
-  "te": "చికెన్ లివర్",
-  "price": 200,
+  "id": "muskmelon",
+  "category": "Fruits",
+  "name": "Muskmelon",
+  "hi": "खरबूजा",
+  "te": "ఖర్బూజ",
+  "price": 50,
   "unit": "kg"
  },
  {
-  "id": "countrychicken",
-  "category": "Chicken",
-  "name": "Country chicken (Nati kodi)",
-  "hi": "देसी मुर्गा",
-  "te": "నాటు కోడి",
-  "price": 550,
+  "id": "grapes",
+  "category": "Fruits",
+  "name": "Grapes",
+  "hi": "अंगूर",
+  "te": "ద్రాక్ష",
+  "price": 100,
   "unit": "kg"
  },
  {
-  "id": "muttoncurry",
-  "category": "Mutton",
-  "name": "Mutton curry cut (goat)",
-  "hi": "मटन करी कट",
-  "te": "మటన్ కర్రీ కట్",
-  "price": 900,
+  "id": "guava",
+  "category": "Fruits",
+  "name": "Guava",
+  "hi": "अमरूद",
+  "te": "జామకాయ",
+  "price": 70,
   "unit": "kg"
  },
  {
-  "id": "muttonboneless",
-  "category": "Mutton",
-  "name": "Boneless mutton",
-  "hi": "बोनलेस मटन",
-  "te": "బోన్‌లెస్ మటన్",
-  "price": 1100,
+  "id": "pineapple",
+  "category": "Fruits",
+  "name": "Pineapple",
+  "hi": "अनानास",
+  "te": "అనాస / పైనాపిల్",
+  "price": 60,
+  "unit": "piece"
+ },
+ {
+  "id": "sapota",
+  "category": "Fruits",
+  "name": "Sapota (Chikoo)",
+  "hi": "चीकू",
+  "te": "సపోటా",
+  "price": 70,
   "unit": "kg"
  },
  {
-  "id": "muttonkeema",
-  "category": "Mutton",
-  "name": "Mutton mince (keema)",
-  "hi": "मटन कीमा",
-  "te": "మటన్ కైమా",
-  "price": 950,
+  "id": "custardapple",
+  "category": "Fruits",
+  "name": "Custard apple",
+  "hi": "सीताफल",
+  "te": "సీతాఫలం",
+  "price": 120,
   "unit": "kg"
  },
  {
-  "id": "muttonribs",
-  "category": "Mutton",
-  "name": "Mutton ribs",
-  "hi": "मटन रिब्स",
-  "te": "మటన్ రిబ్స్",
-  "price": 850,
-  "unit": "kg"
- },
- {
-  "id": "muttonliver",
-  "category": "Mutton",
-  "name": "Mutton liver",
-  "hi": "मटन कलेजी",
-  "te": "మటన్ లివర్",
-  "price": 800,
-  "unit": "kg"
- },
- {
-  "id": "muttonpaya",
-  "category": "Mutton",
-  "name": "Paya (trotters)",
-  "hi": "पाया",
-  "te": "పాయా",
-  "price": 350,
+  "id": "mango",
+  "category": "Fruits",
+  "name": "Mango (in season)",
+  "hi": "आम",
+  "te": "మామిడి పండు",
+  "price": 100,
   "unit": "kg"
  }
 ];
@@ -667,12 +748,51 @@ function addMissingProducts() {
   var added = 0;
   SEED.forEach(function (s) {
     if (have[s.id]) return;
-    var at = sh.getLastRow() + 1;
-    sh.getRange(at, 1, 1, PRODUCT_HEADERS.length).setValues([[s.id, true, true, s.category, s.name, s.te, s.hi, s.price, s.unit, ""]]);
-    sh.getRange(at, 2, 1, 2).insertCheckboxes();
+    addProductRow_(sh, [s.id, true, true, s.category, s.name, s.te, s.hi, s.price, s.unit, ""]);
     added++;
   });
   return added;
+}
+
+/* Run this ONE function after pasting the new Code.gs. It
+   1) removes any Chicken / Mutton rows from Products,
+   2) renames the Ivy gourd, Broad beans and Cucumber (Telugu) rows to the new names, only if you had not changed them,
+   3) adds every new vegetable and fruit that is missing.
+   It never changes prices you already set. */
+function updateProducts() {
+  var sh = ss_().getSheetByName("Products");
+  if (!sh) { setupSheets(); return "Created sheets"; }
+  var removed = 0;
+  for (var r = sh.getLastRow(); r >= 2; r--) {
+    var cat = String(sh.getRange(r, 4).getValue()).toLowerCase();
+    if (cat === "chicken" || cat === "mutton") { sh.deleteRow(r); removed++; }
+  }
+  var renames = { ivygourd: ["Ivy gourd (Tindora)", "Dondakaya - Local (Ivy gourd)"], broadbeans: ["Broad beans", "Chikkudukaya - Local (Broad beans)"] };
+  var last = sh.getLastRow();
+  if (last > 1) {
+    var ids = sh.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) {
+      var id = String(ids[i][0]).trim();
+      if (renames[id] && String(sh.getRange(i + 2, 5).getValue()) === renames[id][0]) sh.getRange(i + 2, 5).setValue(renames[id][1]);
+      if (id === "cucumber") sh.getRange(i + 2, 6).setValue("\u0C15\u0C40\u0C30 \u0C26\u0C4B\u0C38\u0C15\u0C3E\u0C2F");
+    }
+  }
+  var added = addMissingProducts();
+  Logger.log("Removed " + removed + " non-veg rows, added " + added + " new items.");
+  return "Removed " + removed + ", added " + added;
+}
+
+/* Adds one row to Products. Works whether or not the sheet uses "typed columns" (Sheets tables). */
+function addProductRow_(sh, row) {
+  var at = sh.getLastRow() + 1;
+  try {
+    sh.getRange(at, 1, 1, row.length).setValues([row]);
+  } catch (e) {
+    sh.appendRow(row);
+    at = sh.getLastRow();
+  }
+  try { sh.getRange(at, 2, 1, 2).insertCheckboxes(); } catch (e2) { /* already checkboxes / typed column: fine */ }
+  return at;
 }
 
 function truthy(v) { return v === true || String(v).toLowerCase() === "true" || String(v).toLowerCase() === "yes"; }
@@ -836,9 +956,7 @@ function saveProducts_(list) {
     var at = -1;
     for (var i = 0; i < ids.length; i++) if (String(ids[i][0]).trim() === id) { at = i + 2; break; }
     if (at < 0) {
-      at = last + 1;
-      sh.getRange(at, 1, 1, row.length).setValues([row]);
-      sh.getRange(at, 2, 1, 2).insertCheckboxes();
+      addProductRow_(sh, row);
     } else {
       sh.getRange(at, 1, 1, row.length).setValues([row]);
     }

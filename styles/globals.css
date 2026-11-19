@@ -252,15 +252,7 @@ legend { font-size: 13px; font-weight: 600; margin-bottom: 6px; padding: 0; }
 .float-veg { translate: calc(var(--px, 0) * -16px) calc(var(--py, 0) * -10px); transition: translate .25s ease-out; }
 .float-veg.v1, .float-veg.v3 { translate: calc(var(--px, 0) * 12px) calc(var(--py, 0) * -6px); }
 
-/* diet filter */
-.diet { display: flex; gap: 6px; margin-top: 10px; background: var(--paper2); padding: 4px; border-radius: 24px; width: fit-content; max-width: 100%; overflow-x: auto; }
-.dietbtn { border: 0; background: transparent; color: var(--soft); padding: 7px 14px; border-radius: 20px; font-size: 13.5px; font-weight: 600; white-space: nowrap; transition: background .2s, color .2s, box-shadow .2s; }
-.dietbtn.on { background: var(--card); color: var(--green); box-shadow: 0 1px 4px rgba(43,32,19,.18); }
 .list h2 small { font-family: var(--body); font-size: 12px; font-weight: 600; color: var(--soft); background: var(--paper2); border-radius: 10px; padding: 2px 8px; margin-left: 10px; vertical-align: 3px; }
-.meat-note { margin: -2px 0 6px; font-size: 13.5px; color: var(--soft); }
-.dot { display: inline-block; width: 13px; height: 13px; border: 1.5px solid; border-radius: 3px; margin-right: 8px; position: relative; vertical-align: -1px; }
-.dot::after { content: ""; position: absolute; inset: 2.5px; border-radius: 50%; background: currentColor; }
-.dot.veg { color: #1f9d4c; } .dot.nonveg { color: #b4281c; }
 
 /* toast + leaf burst */
 .toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); background: var(--ink); color: #fff; padding: 9px 18px; border-radius: 22px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 60; white-space: nowrap; }
@@ -303,13 +295,11 @@ legend { font-size: 13px; font-weight: 600; margin-bottom: 6px; padding: 0; }
   .row:not(.off):hover { background: #fff8e9; box-shadow: 0 6px 20px rgba(43,32,19,.09); transform: translateY(-2px); }
   .row:not(.off):hover .nm { color: var(--green); }
   .thumb { transition: box-shadow .25s; } .row:not(.off):hover .thumb { box-shadow: 0 0 0 3px rgba(108,143,88,.25); }
-  .add, .primary, .hero-cta, .float, .basket-btn, .ghost, .cat, .dietbtn { transition: transform .15s, box-shadow .2s, background .2s, color .2s, border-color .2s; }
-  .add:hover { background: var(--leaf); transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 14px rgba(47,74,52,.3); }
+  .add, .primary, .hero-cta, .float, .basket-btn, .ghost, .cat,   .add:hover { background: var(--leaf); transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 14px rgba(47,74,52,.3); }
   .add:active, .primary:active, .hero-cta:active, .float:active, .basket-btn:active { transform: scale(.95); }
   .primary:hover, .hero-cta:hover, .float:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(193,119,15,.35); }
   .basket-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(47,74,52,.35); }
-  .cat:hover:not(.on), .dietbtn:hover:not(.on) { border-color: var(--leaf); color: var(--green); background: var(--leaf-bg); }
-  .ghost:hover { background: var(--leaf-bg); border-color: var(--leaf); }
+  .cat:hover:not(.on),   .ghost:hover { background: var(--leaf-bg); border-color: var(--leaf); }
   .stepper button { transition: background .15s, transform .12s; } .stepper button:hover { background: var(--leaf); } .stepper button:active { transform: scale(.85); }
   .step, .g-card, .contact-card, .promises > div { transition: transform .25s, box-shadow .25s, border-color .25s; }
   .step:hover, .contact-card:hover, .promises > div:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(43,32,19,.1); border-color: var(--leaf); }

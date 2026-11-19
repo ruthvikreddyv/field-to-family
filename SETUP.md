@@ -50,4 +50,4 @@ Deploy > Manage deployments > pencil > Version: New version > Deploy (the URL st
 Open your-site/admin. Before first use, change ADMIN_PASSWORD at the top of Code.gs, then Deploy > Manage deployments > pencil > New version > Deploy.
 
 ## Updating an existing Sheet to the newest Code.gs
-Paste the new Code.gs, run `addMissingProducts` once (adds new items, keeps your prices), then Deploy > Manage deployments > pencil > New version > Deploy.
+Paste the new Code.gs, run `updateProducts` once (removes old non-veg rows, adds new items, keeps your prices), then Deploy > Manage deployments > pencil > New version > Deploy.

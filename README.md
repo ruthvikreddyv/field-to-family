@@ -87,14 +87,14 @@ SETUP.md                     Short setup guide
    - `minOrder`, `freeDeliveryAbove`, `deliveryFee`
 
 ### Part C: GitHub (new repo)
-1. Go to github.com/new, name it (for example `field-to-family-v2`) and leave the README, .gitignore and license **unticked**.
+1. Go to github.com/new, name it (for example `field-to-family`) and leave the README, .gitignore and license **unticked**.
 2. In PowerShell inside this folder run:
    ```
    git init
    git add -A
    git commit -m "Field to Family: simple WhatsApp ordering site"
    git branch -M main
-   git remote add origin https://github.com/<your-username>/field-to-family-v2.git
+   git remote add origin https://github.com/<your-username>/field-to-family.git
    git push -u origin main
    ```
    If git asks who you are, run `git config --global user.email "you@example.com"` and
@@ -119,8 +119,10 @@ To overwrite an old repo instead of making a new one, use `git push --force orig
 - "Questions & bulk orders" section with 3 phone numbers (Call and WhatsApp buttons) and the enquiry email `fieldtofamily2026@gmail.com`.
   Edit them in `lib/config.mjs` under `contact`. Orders still go to `whatsappNumber`.
 - Bigger Telugu and Hindi text (16 px) everywhere.
-- 68 items: 24 more vegetables (gongura, curry leaves, yam, arbi, cluster beans, raw banana, broccoli, mushroom...) plus
-  8 Chicken and 6 Mutton items, each with its own drawing. Filter: All / Vegetarian / Chicken & mutton. Green and red veg / non-veg marks.
+- 77 items, all vegetarian, each with its own drawing: 63 vegetables (gongura, bachala kura, chukka kura, koyi gura, round sorakaya,
+  dosakaya, Dondakaya local / hybrid, Gokarakaya local / hybrid, Chikkudukaya local / hybrid, yam, arbi, broccoli, mushroom...)
+  and 14 basic fruits (banana, apple, orange, mosambi, pomegranate, papaya, watermelon, muskmelon, grapes, guava, pineapple,
+  sapota, custard apple, mango). There is no non-veg anywhere on the site.
 - Location: pincode box with suggestions as you type (by digits or locality name), city set to Hyderabad automatically,
   other cities blocked, optional landmark, and "Use my location" which pins Google Maps and tries to fill the pincode and area.
   The pincode list is in `lib/pincodes.mjs` (approximate, add more any time; any 500001 to 500100 is accepted).
@@ -129,11 +131,11 @@ To overwrite an old repo instead of making a new one, use `git push --force orig
 
 ### If you already have a live Google Sheet (do this once)
 1. Apps Script: paste the new `Code.gs`, keep your own `ADMIN_PASSWORD`, save.
-2. Choose the function **addMissingProducts** and click Run. It adds the new vegetables, chicken and mutton to your Products tab
-   and never changes items or prices you already have.
+2. Choose the function **updateProducts** and click Run. It deletes any old Chicken / Mutton rows, adds the new vegetables and fruits,
+   and never changes prices you already set.
 3. Deploy > Manage deployments > pencil > Version: New version > Deploy.
 4. The Rs 299 free delivery rule is in the script too, so step 3 is needed for the Sheet totals to match.
-5. Set your real prices for the new items. The prices shipped are only starting values. Please also check the Telugu and Hindi names.
+5. Set your real prices for the new items. The prices shipped are only starting values. Please also check the Telugu and Hindi names, especially Koyi gura and Gokarakaya (the Local / Hybrid split is my guess: rename them in the admin page).
 
 ## Pictures, photos and look
 

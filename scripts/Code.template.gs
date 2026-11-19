@@ -54,12 +54,51 @@ function addMissingProducts() {
   var added = 0;
   SEED.forEach(function (s) {
     if (have[s.id]) return;
-    var at = sh.getLastRow() + 1;
-    sh.getRange(at, 1, 1, PRODUCT_HEADERS.length).setValues([[s.id, true, true, s.category, s.name, s.te, s.hi, s.price, s.unit, ""]]);
-    sh.getRange(at, 2, 1, 2).insertCheckboxes();
+    addProductRow_(sh, [s.id, true, true, s.category, s.name, s.te, s.hi, s.price, s.unit, ""]);
     added++;
   });
   return added;
+}
+
+/* Run this ONE function after pasting the new Code.gs. It
+   1) removes any Chicken / Mutton rows from Products,
+   2) renames the Ivy gourd, Broad beans and Cucumber (Telugu) rows to the new names, only if you had not changed them,
+   3) adds every new vegetable and fruit that is missing.
+   It never changes prices you already set. */
+function updateProducts() {
+  var sh = ss_().getSheetByName("Products");
+  if (!sh) { setupSheets(); return "Created sheets"; }
+  var removed = 0;
+  for (var r = sh.getLastRow(); r >= 2; r--) {
+    var cat = String(sh.getRange(r, 4).getValue()).toLowerCase();
+    if (cat === "chicken" || cat === "mutton") { sh.deleteRow(r); removed++; }
+  }
+  var renames = { ivygourd: ["Ivy gourd (Tindora)", "Dondakaya - Local (Ivy gourd)"], broadbeans: ["Broad beans", "Chikkudukaya - Local (Broad beans)"] };
+  var last = sh.getLastRow();
+  if (last > 1) {
+    var ids = sh.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) {
+      var id = String(ids[i][0]).trim();
+      if (renames[id] && String(sh.getRange(i + 2, 5).getValue()) === renames[id][0]) sh.getRange(i + 2, 5).setValue(renames[id][1]);
+      if (id === "cucumber") sh.getRange(i + 2, 6).setValue("\u0C15\u0C40\u0C30 \u0C26\u0C4B\u0C38\u0C15\u0C3E\u0C2F");
+    }
+  }
+  var added = addMissingProducts();
+  Logger.log("Removed " + removed + " non-veg rows, added " + added + " new items.");
+  return "Removed " + removed + ", added " + added;
+}
+
+/* Adds one row to Products. Works whether or not the sheet uses "typed columns" (Sheets tables). */
+function addProductRow_(sh, row) {
+  var at = sh.getLastRow() + 1;
+  try {
+    sh.getRange(at, 1, 1, row.length).setValues([row]);
+  } catch (e) {
+    sh.appendRow(row);
+    at = sh.getLastRow();
+  }
+  try { sh.getRange(at, 2, 1, 2).insertCheckboxes(); } catch (e2) { /* already checkboxes / typed column: fine */ }
+  return at;
 }
 
 function truthy(v) { return v === true || String(v).toLowerCase() === "true" || String(v).toLowerCase() === "yes"; }
@@ -223,9 +262,7 @@ function saveProducts_(list) {
     var at = -1;
     for (var i = 0; i < ids.length; i++) if (String(ids[i][0]).trim() === id) { at = i + 2; break; }
     if (at < 0) {
-      at = last + 1;
-      sh.getRange(at, 1, 1, row.length).setValues([row]);
-      sh.getRange(at, 2, 1, 2).insertCheckboxes();
+      addProductRow_(sh, row);
     } else {
       sh.getRange(at, 1, 1, row.length).setValues([row]);
     }

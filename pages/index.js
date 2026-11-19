@@ -11,8 +11,8 @@ import {
   priceBreakdown, stepFor, validateCheckout, whatsappLink,
 } from "../lib/order.mjs";
 
-const CART_KEY = "f2f_cart_v2";
-const FORM_KEY = "f2f_form_v2";
+const CART_KEY = "f2f_cart";
+const FORM_KEY = "f2f_form";
 
 function load(key, fallback) {
   try {
@@ -54,7 +54,6 @@ export default function Home() {
   const [order, setOrder] = useState(null);
   const loggedRef = useRef(false);
   const [last, setLast] = useState(null);
-  const [diet, setDiet] = useState("all"); // all | veg | nonveg
   const [toast, setToast] = useState("");
   const [origin, setOrigin] = useState("");
 
@@ -67,7 +66,7 @@ export default function Home() {
   useEffect(() => {
     setCart(load(CART_KEY, {}));
     setForm((f) => ({ ...f, ...load(FORM_KEY, {}) }));
-    setLast(load("f2f_last_v1", null));
+    setLast(load("f2f_last", null));
     setOrigin(window.location.origin);
     setReady(true);
   }, []);
@@ -101,17 +100,11 @@ export default function Home() {
   const totals = priceBreakdown(Math.round(subtotal * 100) / 100, CONFIG);
   const itemCount = lines.length;
 
-  const isNonVeg = (p) => /chicken|mutton|meat|fish|egg|prawn/i.test(p.category);
-  const dietProducts = useMemo(
-    () => products.filter((p) => diet === "all" || (diet === "nonveg") === isNonVeg(p)),
-    [products, diet]
-  );
-
   const categories = useMemo(() => {
     const seen = [];
-    dietProducts.forEach((p) => { if (!seen.includes(p.category)) seen.push(p.category); });
+    products.forEach((p) => { if (!seen.includes(p.category)) seen.push(p.category); });
     return seen;
-  }, [dietProducts]);
+  }, [products]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -119,13 +112,13 @@ export default function Home() {
       .filter((c) => activeCat === "All" || c === activeCat)
       .map((c) => ({
         category: c,
-        items: dietProducts.filter(
+        items: products.filter(
           (p) => p.category === c &&
             (!q || p.name.toLowerCase().includes(q) || p.hi.includes(q) || p.te.includes(q))
         ),
       }))
       .filter((g) => g.items.length);
-  }, [dietProducts, categories, activeCat, query]);
+  }, [products, categories, activeCat, query]);
 
   function setQty(id, qty) {
     setCart((c) => {
@@ -169,7 +162,7 @@ export default function Home() {
   function onSendClick() {
     if (!order || loggedRef.current) return;
     loggedRef.current = true;
-    save("f2f_last_v1", Object.fromEntries(order.lines.map((l) => [l.id, l.qty])));
+    save("f2f_last", Object.fromEntries(order.lines.map((l) => [l.id, l.qty])));
     if (CONFIG.sheetUrl) {
       const payload = {
         orderId: order.orderId,
@@ -208,7 +201,6 @@ export default function Home() {
     const t = setTimeout(() => setToast(""), 1700);
     return () => clearTimeout(t);
   }, [toast]);
-  useEffect(() => { setActiveCat("All"); }, [diet]);
 
   const inCart = (id) => cart[id] || 0;
 
@@ -274,11 +266,6 @@ export default function Home() {
             className="search" type="search" value={query} onChange={(e) => setQuery(e.target.value)}
             placeholder="Search vegetables (English / తెలుగు / हिन्दी)" aria-label="Search vegetables"
           />
-          <div className="diet" role="group" aria-label="Filter by type">
-            {[["all", "All"], ["veg", "Vegetarian"], ["nonveg", "Chicken & mutton"]].map(([k, l]) => (
-              <button key={k} className={"dietbtn" + (diet === k ? " on" : "")} onClick={() => setDiet(k)}>{l}</button>
-            ))}
-          </div>
           <div className="cats" role="tablist">
             {["All", ...categories].map((c) => (
               <button key={c} className={"cat" + (activeCat === c ? " on" : "")} onClick={() => setActiveCat(c)}>{c}</button>
@@ -297,7 +284,6 @@ export default function Home() {
         {visible.map((g) => (
           <section key={g.category}>
             <h2>{g.category}<small>{g.items.length}</small></h2>
-            {isNonVeg(g.items[0]) && CONFIG.meatNote && <p className="meat-note">{CONFIG.meatNote}</p>}
             {g.items.map((p) => {
               const q = inCart(p.id);
               return (
@@ -306,7 +292,7 @@ export default function Home() {
                     {p.image ? <img src={p.image} alt="" loading="lazy" /> : <VegArt id={p.id} name={p.name} size={60} />}
                   </div>
                   <div className="info">
-                    <div className="nm"><i className={"dot " + (isNonVeg(p) ? "nonveg" : "veg")} title={isNonVeg(p) ? "Non-vegetarian" : "Vegetarian"} />{p.name}{CONFIG.popular && CONFIG.popular.includes(p.id) && <i className="tag">Popular</i>}</div>
+                    <div className="nm">{p.name}{CONFIG.popular && CONFIG.popular.includes(p.id) && <i className="tag">Popular</i>}</div>
                     <div className="native">{p.te}{p.te && p.hi ? " · " : ""}{p.hi}</div>
                     <div className="pr"><b>₹{p.price}</b> / {p.unit}{!p.available && <em> · Out of stock today</em>}</div>
                   </div>
